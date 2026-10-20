@@ -1,0 +1,495 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Pharmacy {
+  id                    String                 @id @default(uuid())
+  name                  String
+  licenseNumber         String?
+  address               String?
+  phone                 String?
+  email                 String?
+  country               String                 @default("Sudan")
+  currency              String                 @default("SDG")
+  timezone              String?
+  logoUrl               String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  auditLogs             AuditLog[]
+  batches               Batch[]
+  categories            Category[]
+  inventoryTransactions InventoryTransaction[]
+  medicines             Medicine[]
+  patients              Patient[]
+  prescriptions         Prescription[]
+  purchases             Purchase[]
+  purchaseReceipts      PurchaseReceipt[]
+  sales                 Sale[]
+  suppliers             Supplier[]
+  users                 User[]
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        RoleName @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+}
+
+model User {
+  id                    String                 @id @default(uuid())
+  pharmacyId            String
+  roleId                String
+  name                  String
+  username              String                 @unique
+  email                 String?
+  passwordHash          String
+  isActive              Boolean                @default(true)
+  lastLoginAt           DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  auditLogs             AuditLog[]
+  inventoryTransactions InventoryTransaction[]
+  prescriptionsCreated  Prescription[]         @relation("PrescriptionCreatedBy")
+  purchasesCreated      Purchase[]             @relation("PurchaseCreatedBy")
+  receiptsCreated       PurchaseReceipt[]      @relation("ReceiptCreatedBy")
+  sales                 Sale[]
+  pharmacy              Pharmacy               @relation(fields: [pharmacyId], references: [id])
+  role                  Role                   @relation(fields: [roleId], references: [id])
+
+  @@index([pharmacyId])
+  @@index([roleId])
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  pharmacyId  String
+  name        String
+  description String?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  pharmacy    Pharmacy   @relation(fields: [pharmacyId], references: [id])
+  medicines   Medicine[]
+
+  @@unique([pharmacyId, name])
+  @@index([pharmacyId])
+}
+
+model Medicine {
+  id                    String                 @id @default(uuid())
+  pharmacyId            String
+  categoryId            String
+  name                  String
+  genericName           String?
+  brandName             String?
+  manufacturer          String?
+  dosageForm            String
+  strength              String?
+  baseUnit              String
+  prescriptionStatus    ControlledStatus       @default(OTC)
+  sellingPrice          Decimal                @db.Decimal(12, 2)
+  reorderLevel          Decimal                @default(0) @db.Decimal(12, 3)
+  barcode               String?
+  isActive              Boolean                @default(true)
+  notes                 String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  batches               Batch[]
+  inventoryTransactions InventoryTransaction[]
+  category              Category               @relation(fields: [categoryId], references: [id])
+  pharmacy              Pharmacy               @relation(fields: [pharmacyId], references: [id])
+  packages              MedicinePackage[]
+  prescriptionItems     PrescriptionItem[]
+  purchaseItems         PurchaseItem[]
+  saleItems             SaleItem[]
+
+  @@index([pharmacyId])
+  @@index([categoryId])
+  @@index([name])
+  @@index([genericName])
+  @@index([barcode])
+}
+
+model MedicinePackage {
+  id                  String   @id @default(uuid())
+  medicineId          String
+  name                String
+  quantityInBaseUnits Decimal  @db.Decimal(12, 3)
+  barcode             String?
+  isDefault           Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  medicine            Medicine @relation(fields: [medicineId], references: [id])
+
+  @@index([medicineId])
+  @@index([barcode])
+}
+
+model Batch {
+  id                    String                 @id @default(uuid())
+  pharmacyId            String
+  medicineId            String
+  batchNumber           String
+  expiryDate            DateTime
+  purchasePrice         Decimal                @db.Decimal(12, 2)
+  receivedQuantity      Decimal                @db.Decimal(12, 3)
+  currentQuantity       Decimal                @db.Decimal(12, 3)
+  receivedAt            DateTime               @default(now())
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  medicine              Medicine               @relation(fields: [medicineId], references: [id])
+  pharmacy              Pharmacy               @relation(fields: [pharmacyId], references: [id])
+  inventoryTransactions InventoryTransaction[]
+  receiptItems          PurchaseReceiptItem[]
+  saleAllocations       SaleItemBatch[]
+
+  @@unique([pharmacyId, medicineId, batchNumber])
+  @@index([pharmacyId])
+  @@index([medicineId])
+  @@index([expiryDate])
+}
+
+model Supplier {
+  id            String     @id @default(uuid())
+  pharmacyId    String
+  name          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  isActive      Boolean    @default(true)
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  purchases     Purchase[]
+  pharmacy      Pharmacy   @relation(fields: [pharmacyId], references: [id])
+
+  @@index([pharmacyId])
+  @@index([name])
+}
+
+model Purchase {
+  id             String            @id @default(uuid())
+  pharmacyId     String
+  supplierId     String
+  createdById    String
+  purchaseNumber String
+  status         PurchaseStatus    @default(DRAFT)
+  purchaseDate   DateTime          @default(now())
+  expectedDate   DateTime?
+  totalAmount    Decimal           @default(0) @db.Decimal(14, 2)
+  notes          String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  createdBy      User              @relation("PurchaseCreatedBy", fields: [createdById], references: [id])
+  pharmacy       Pharmacy          @relation(fields: [pharmacyId], references: [id])
+  supplier       Supplier          @relation(fields: [supplierId], references: [id])
+  items          PurchaseItem[]
+  receipts       PurchaseReceipt[]
+
+  @@unique([pharmacyId, purchaseNumber])
+  @@index([pharmacyId])
+  @@index([supplierId])
+  @@index([status])
+}
+
+model PurchaseItem {
+  id              String                @id @default(uuid())
+  purchaseId      String
+  medicineId      String
+  orderedQuantity Decimal               @db.Decimal(12, 3)
+  unitCost        Decimal               @db.Decimal(12, 2)
+  totalCost       Decimal               @db.Decimal(14, 2)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  medicine        Medicine              @relation(fields: [medicineId], references: [id])
+  purchase        Purchase              @relation(fields: [purchaseId], references: [id])
+  receiptItems    PurchaseReceiptItem[]
+
+  @@index([purchaseId])
+  @@index([medicineId])
+}
+
+model PurchaseReceipt {
+  id            String                @id @default(uuid())
+  pharmacyId    String
+  purchaseId    String
+  createdById   String
+  receiptNumber String
+  receivedAt    DateTime              @default(now())
+  notes         String?
+  createdAt     DateTime              @default(now())
+  createdBy     User                  @relation("ReceiptCreatedBy", fields: [createdById], references: [id])
+  pharmacy      Pharmacy              @relation(fields: [pharmacyId], references: [id])
+  purchase      Purchase              @relation(fields: [purchaseId], references: [id])
+  items         PurchaseReceiptItem[]
+
+  @@unique([pharmacyId, receiptNumber])
+  @@index([purchaseId])
+}
+
+model PurchaseReceiptItem {
+  id               String          @id @default(uuid())
+  receiptId        String
+  purchaseItemId   String
+  batchId          String
+  quantityReceived Decimal         @db.Decimal(12, 3)
+  unitCost         Decimal         @db.Decimal(12, 2)
+  createdAt        DateTime        @default(now())
+  batch            Batch           @relation(fields: [batchId], references: [id])
+  purchaseItem     PurchaseItem    @relation(fields: [purchaseItemId], references: [id])
+  receipt          PurchaseReceipt @relation(fields: [receiptId], references: [id])
+
+  @@index([receiptId])
+  @@index([purchaseItemId])
+  @@index([batchId])
+}
+
+model Patient {
+  id            String         @id @default(uuid())
+  pharmacyId    String
+  patientNumber String
+  firstName     String
+  lastName      String?
+  dateOfBirth   DateTime?
+  sex           String?
+  phone         String?
+  address       String?
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  pharmacy      Pharmacy       @relation(fields: [pharmacyId], references: [id])
+  prescriptions Prescription[]
+  sales         Sale[]
+
+  @@unique([pharmacyId, patientNumber])
+  @@index([pharmacyId])
+  @@index([lastName])
+}
+
+model Prescription {
+  id                 String             @id @default(uuid())
+  pharmacyId         String
+  patientId          String
+  createdById        String
+  prescriptionNumber String
+  prescriberName     String
+  prescriptionDate   DateTime
+  status             PrescriptionStatus @default(PENDING)
+  notes              String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  createdBy          User               @relation("PrescriptionCreatedBy", fields: [createdById], references: [id])
+  patient            Patient            @relation(fields: [patientId], references: [id])
+  pharmacy           Pharmacy           @relation(fields: [pharmacyId], references: [id])
+  items              PrescriptionItem[]
+
+  @@unique([pharmacyId, prescriptionNumber])
+  @@index([patientId])
+  @@index([pharmacyId])
+}
+
+model PrescriptionItem {
+  id                 String       @id @default(uuid())
+  prescriptionId     String
+  medicineId         String
+  quantityPrescribed Decimal      @db.Decimal(12, 3)
+  quantityDispensed  Decimal      @default(0) @db.Decimal(12, 3)
+  directions         String?
+  notes              String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  medicine           Medicine     @relation(fields: [medicineId], references: [id])
+  prescription       Prescription @relation(fields: [prescriptionId], references: [id])
+
+  @@index([prescriptionId])
+  @@index([medicineId])
+}
+
+model Sale {
+  id            String     @id @default(uuid())
+  pharmacyId    String
+  patientId     String?
+  soldById      String
+  invoiceNumber String
+  subtotal      Decimal    @db.Decimal(14, 2)
+  discount      Decimal    @default(0) @db.Decimal(14, 2)
+  tax           Decimal    @default(0) @db.Decimal(14, 2)
+  total         Decimal    @db.Decimal(14, 2)
+  status        SaleStatus @default(COMPLETED)
+  saleDate      DateTime   @default(now())
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  payments      Payment[]
+  patient       Patient?   @relation(fields: [patientId], references: [id])
+  pharmacy      Pharmacy   @relation(fields: [pharmacyId], references: [id])
+  soldBy        User       @relation(fields: [soldById], references: [id])
+  items         SaleItem[]
+
+  @@unique([pharmacyId, invoiceNumber])
+  @@index([pharmacyId])
+  @@index([patientId])
+  @@index([saleDate])
+}
+
+model SaleItem {
+  id               String          @id @default(uuid())
+  saleId           String
+  medicineId       String
+  quantity         Decimal         @db.Decimal(12, 3)
+  unitPrice        Decimal         @db.Decimal(12, 2)
+  discount         Decimal         @default(0) @db.Decimal(14, 2)
+  total            Decimal         @db.Decimal(14, 2)
+  createdAt        DateTime        @default(now())
+  medicine         Medicine        @relation(fields: [medicineId], references: [id])
+  sale             Sale            @relation(fields: [saleId], references: [id])
+  batchAllocations SaleItemBatch[]
+
+  @@index([saleId])
+  @@index([medicineId])
+}
+
+model SaleItemBatch {
+  id         String   @id @default(uuid())
+  saleItemId String
+  batchId    String
+  quantity   Decimal  @db.Decimal(12, 3)
+  createdAt  DateTime @default(now())
+  batch      Batch    @relation(fields: [batchId], references: [id])
+  saleItem   SaleItem @relation(fields: [saleItemId], references: [id])
+
+  @@index([saleItemId])
+  @@index([batchId])
+}
+
+model Payment {
+  id                   String        @id @default(uuid())
+  saleId               String
+  paymentMethod        PaymentMethod
+  amount               Decimal       @db.Decimal(14, 2)
+  status               PaymentStatus @default(COMPLETED)
+  transactionReference String?
+  paidAt               DateTime      @default(now())
+  createdAt            DateTime      @default(now())
+  sale                 Sale          @relation(fields: [saleId], references: [id])
+
+  @@index([saleId])
+}
+
+model InventoryTransaction {
+  id              String                   @id @default(uuid())
+  pharmacyId      String
+  medicineId      String
+  batchId         String
+  transactionType InventoryTransactionType
+  quantity        Decimal                  @db.Decimal(12, 3)
+  referenceType   ReferenceType
+  referenceId     String?
+  reason          String?
+  createdById     String
+  createdAt       DateTime                 @default(now())
+  batch           Batch                    @relation(fields: [batchId], references: [id])
+  createdBy       User                     @relation(fields: [createdById], references: [id])
+  medicine        Medicine                 @relation(fields: [medicineId], references: [id])
+  pharmacy        Pharmacy                 @relation(fields: [pharmacyId], references: [id])
+
+  @@index([pharmacyId])
+  @@index([medicineId])
+  @@index([batchId])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  pharmacyId String
+  userId     String
+  action     String
+  entityType String
+  entityId   String?
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([pharmacyId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+enum RoleName {
+  ADMIN
+  PHARMACIST
+}
+
+enum PurchaseStatus {
+  DRAFT
+  ORDERED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum SaleStatus {
+  COMPLETED
+  VOIDED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  MOBILE_PAYMENT
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PrescriptionStatus {
+  PENDING
+  PARTIALLY_DISPENSED
+  DISPENSED
+  CANCELLED
+}
+
+enum ControlledStatus {
+  OTC
+  PRESCRIPTION
+  CONTROLLED
+}
+
+enum InventoryTransactionType {
+  PURCHASE
+  SALE
+  CUSTOMER_RETURN
+  SUPPLIER_RETURN
+  DAMAGE
+  EXPIRY
+  ADJUSTMENT
+}
+
+enum ReferenceType {
+  PURCHASE_RECEIPT
+  SALE
+  CUSTOMER_RETURN
+  SUPPLIER_RETURN
+  ADJUSTMENT
+  OTHER
+}

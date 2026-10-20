@@ -1,0 +1,302 @@
+@import "tailwindcss";
+
+/* ============================================================
+   PHARMACY DESIGN SYSTEM
+   ============================================================ */
+
+:root {
+  /* ------------------------------------------------------------
+     Main colors
+     ------------------------------------------------------------ */
+
+  --background: #e2dfe0;
+  --foreground: #111111;
+
+  --primary: #00452a;
+  --primary-dark: #00351f;
+  --primary-light: #00633d;
+  --primary-soft: #e6f1ec;
+
+  /* ------------------------------------------------------------
+     Surfaces
+     ------------------------------------------------------------ */
+
+  --surface: #ffffff;
+  --surface-muted: #f7f7f7;
+  --surface-subtle: #fafbfa;
+  --surface-green: #edf6f1;
+
+  /* ------------------------------------------------------------
+     Borders
+     ------------------------------------------------------------ */
+
+  --border: #dedede;
+  --border-light: #eeeeee;
+  --border-green: #d9e9e1;
+
+  /* ------------------------------------------------------------
+     Text
+     ------------------------------------------------------------ */
+
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+  --text-placeholder: #aaaaaa;
+
+  /* ------------------------------------------------------------
+     Status
+     ------------------------------------------------------------ */
+
+  --success: #16a34a;
+  --success-soft: #eaf8ef;
+
+  --warning: #d97706;
+  --warning-soft: #fff7e8;
+
+  --danger: #dc2626;
+  --danger-soft: #fef0f0;
+
+  --info: #2563eb;
+  --info-soft: #eef4ff;
+
+  /* ------------------------------------------------------------
+     Radius
+     ------------------------------------------------------------ */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-pill: 999px;
+
+  /* ------------------------------------------------------------
+     Shadows
+     ------------------------------------------------------------ */
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  --shadow-card: 0 3px 12px rgba(0, 0, 0, 0.035);
+
+  --shadow-primary: 0 4px 12px rgba(0, 69, 42, 0.16);
+
+  --shadow-primary-hover: 0 6px 16px rgba(0, 69, 42, 0.2);
+
+  /* ------------------------------------------------------------
+     Focus
+     ------------------------------------------------------------ */
+
+  --focus-ring: 0 0 0 3px rgba(0, 69, 42, 0.1);
+
+  /* ------------------------------------------------------------
+     Layout
+     ------------------------------------------------------------ */
+
+  --sidebar-width: 16rem;
+  --header-height: 4rem;
+}
+
+/* ============================================================
+   TAILWIND THEME
+   ============================================================ */
+
+@theme inline {
+  /* ----------------------------------------------------------
+     Colors
+     ---------------------------------------------------------- */
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-primary-soft: var(--primary-soft);
+
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-green: var(--surface-green);
+
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-border-green: var(--border-green);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-placeholder: var(--text-placeholder);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  /* ----------------------------------------------------------
+     Typography
+     ---------------------------------------------------------- */
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* ----------------------------------------------------------
+     Radius
+     ---------------------------------------------------------- */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-pill: 999px;
+
+  /* ----------------------------------------------------------
+     Shadows
+     ---------------------------------------------------------- */
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  --shadow-card: 0 3px 12px rgba(0, 0, 0, 0.035);
+
+  --shadow-primary: 0 4px 12px rgba(0, 69, 42, 0.16);
+
+  --shadow-primary-hover: 0 6px 16px rgba(0, 69, 42, 0.2);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+
+  background: var(--background);
+  color: var(--foreground);
+
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   GLOBAL ELEMENTS
+   ============================================================ */
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+
+::selection {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* ============================================================
+   RTL SUPPORT
+   ============================================================ */
+
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="ltr"] {
+  text-align: left;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+[dir="ltr"] input,
+[dir="ltr"] textarea,
+[dir="ltr"] select {
+  text-align: left;
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
