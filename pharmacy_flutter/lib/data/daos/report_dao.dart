@@ -82,9 +82,11 @@ class ReportDao implements IReportDao {
     DateTime? endDate,
   }) async {
     final query = _db.select(_db.sales)
-      ..where((tbl) =>
-          tbl.pharmacyId.equals(pharmacyId) &
-          tbl.status.equals(SaleStatus.completed.index));
+      ..where(
+        (tbl) =>
+            tbl.pharmacyId.equals(pharmacyId) &
+            tbl.status.equals(SaleStatus.completed.index),
+      );
 
     if (startDate != null) {
       query.where((tbl) => tbl.saleDate.isBiggerOrEqualValue(startDate));
@@ -165,20 +167,17 @@ class ReportDao implements IReportDao {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    final query = _db.select(_db.saleItems).join([
-      innerJoin(
-        _db.sales,
-        _db.sales.id.equalsExp(_db.saleItems.saleId),
-      ),
-      innerJoin(
-        _db.medicines,
-        _db.medicines.id.equalsExp(_db.saleItems.medicineId),
-      ),
-    ])
-      ..where(
-        _db.sales.pharmacyId.equals(pharmacyId) &
-            _db.sales.status.equals(SaleStatus.completed.index),
-      );
+    final query =
+        _db.select(_db.saleItems).join([
+          innerJoin(_db.sales, _db.sales.id.equalsExp(_db.saleItems.saleId)),
+          innerJoin(
+            _db.medicines,
+            _db.medicines.id.equalsExp(_db.saleItems.medicineId),
+          ),
+        ])..where(
+          _db.sales.pharmacyId.equals(pharmacyId) &
+              _db.sales.status.equals(SaleStatus.completed.index),
+        );
 
     if (startDate != null) {
       query.where(_db.sales.saleDate.isBiggerOrEqualValue(startDate));
@@ -226,17 +225,14 @@ class ReportDao implements IReportDao {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    final query = _db.select(_db.payments).join([
-      innerJoin(
-        _db.sales,
-        _db.sales.id.equalsExp(_db.payments.saleId),
-      ),
-    ])
-      ..where(
-        _db.sales.pharmacyId.equals(pharmacyId) &
-            _db.sales.status.equals(SaleStatus.completed.index) &
-            _db.payments.status.equals(PaymentStatus.completed.index),
-      );
+    final query =
+        _db.select(_db.payments).join([
+          innerJoin(_db.sales, _db.sales.id.equalsExp(_db.payments.saleId)),
+        ])..where(
+          _db.sales.pharmacyId.equals(pharmacyId) &
+              _db.sales.status.equals(SaleStatus.completed.index) &
+              _db.payments.status.equals(PaymentStatus.completed.index),
+        );
 
     if (startDate != null) {
       query.where(_db.sales.saleDate.isBiggerOrEqualValue(startDate));

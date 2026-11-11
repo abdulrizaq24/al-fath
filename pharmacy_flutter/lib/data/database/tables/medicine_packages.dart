@@ -7,11 +7,11 @@ class MedicinePackages extends Table {
   TextColumn get id => text()();
   TextColumn get medicineId => text().references(Medicines, #id)();
   TextColumn get name => text()();
-  RealColumn get quantityInBaseUnits => real()();
+  IntColumn get quantityInBaseUnits => integer()();
   TextColumn get barcode => text().nullable()();
   BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:printing/printing.dart';
 
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/formatters.dart';
@@ -31,28 +30,32 @@ class _SalesPageState extends ConsumerState<SalesPage> {
     super.dispose();
   }
 
-  double get _subtotal => _cart.fold(0.0, (s, i) => s + (i.quantity * i.unitPrice));
+  double get _subtotal =>
+      _cart.fold(0.0, (s, i) => s + (i.quantity * i.unitPrice));
   double get _totalDiscount => _cart.fold(0.0, (s, i) => s + i.discount);
   double get _grandTotal => _subtotal - _totalDiscount;
 
   void _addToCart(MedicineWithCategory med, double availableStock) {
+    final loc = AppLocalizations.of(context);
     if (availableStock <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Stok obat habis atau telah kadaluarsa!'),
+        SnackBar(
+          content: Text(loc.t('medicineExpired')),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    final existingIndex = _cart.indexWhere((i) => i.medicineId == med.medicine.id);
+    final existingIndex = _cart.indexWhere(
+      (i) => i.medicineId == med.medicine.id,
+    );
     if (existingIndex >= 0) {
       final current = _cart[existingIndex];
       if (current.quantity + 1 > availableStock) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kuantitas melebihi stok yang tersedia.'),
+          SnackBar(
+            content: Text(loc.t('exceedsStock')),
             backgroundColor: Colors.orange,
           ),
         );
@@ -69,12 +72,14 @@ class _SalesPageState extends ConsumerState<SalesPage> {
       });
     } else {
       setState(() {
-        _cart.add(SaleCartItemInput(
-          medicineId: med.medicine.id,
-          medicineName: med.medicine.name,
-          quantity: 1,
-          unitPrice: med.medicine.sellingPrice,
-        ));
+        _cart.add(
+          SaleCartItemInput(
+            medicineId: med.medicine.id,
+            medicineName: med.medicine.name,
+            quantity: 1,
+            unitPrice: med.medicine.sellingPrice,
+          ),
+        );
       });
     }
   }
@@ -97,6 +102,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
   }
 
   Future<void> _handleCheckout() async {
+    final loc = AppLocalizations.of(context);
     if (_cart.isEmpty) return;
 
     final authState = ref.read(authStateProvider);
@@ -104,12 +110,13 @@ class _SalesPageState extends ConsumerState<SalesPage> {
     final userId = authState.currentUser?.id ?? '';
     final pharmacyName = authState.currentPharmacy?.name ?? 'PharmaCare';
 
-    final paidAmount = double.tryParse(_paidAmountController.text) ?? _grandTotal;
+    final paidAmount =
+        double.tryParse(_paidAmountController.text) ?? _grandTotal;
 
     if (paidAmount < _grandTotal) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nominal pembayaran kurang dari total tagihan!'),
+        SnackBar(
+          content: Text(loc.t('paymentInsufficient')),
           backgroundColor: Colors.red,
         ),
       );
@@ -142,24 +149,26 @@ class _SalesPageState extends ConsumerState<SalesPage> {
       await showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.check_circle, color: Color(0xFF2E7D32)),
               SizedBox(width: 8),
-              Text('Transaksi Berhasil!'),
+              Text(loc.t('transactionSuccess')),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('No. Faktur: ${saleResult.sale.invoiceNumber}'),
+              Text('${loc.t('invoiceNo')} ${saleResult.sale.invoiceNumber}'),
               const SizedBox(height: 8),
-              Text('Total Belanja: ${AppFormatters.currency(_grandTotal)}'),
-              Text('Dibayar: ${AppFormatters.currency(paidAmount)}'),
+              Text('${loc.t('total')}: ${AppFormatters.currency(_grandTotal)}'),
+              Text(
+                '${loc.t('paidAmount')}: ${AppFormatters.currency(paidAmount)}',
+              ),
               const Divider(height: 20),
               Text(
-                'Kembalian: ${AppFormatters.currency(change)}',
+                '${loc.t('change')} ${AppFormatters.currency(change)}',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -171,19 +180,23 @@ class _SalesPageState extends ConsumerState<SalesPage> {
           actions: [
             OutlinedButton.icon(
               icon: const Icon(Icons.print),
-              label: const Text('Cetak Struk'),
+              label: Text(loc.t('printReceipt')),
               onPressed: () async {
                 final exportService = ref.read(exportServiceProvider);
-                final pdfBytes = await exportService.generateReceiptPdf(
+                await exportService.generateReceiptPdf(
                   saleResult,
                   pharmacyName,
                 );
-                await Printing.layoutPdf(onLayout: (_) => pdfBytes);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(loc.t('exportSuccess'))),
+                  );
+                }
               },
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Tutup'),
+              child: Text(loc.t('close')),
             ),
           ],
         ),
@@ -191,10 +204,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -251,24 +261,24 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                       ),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
 
                         final medicines = snapshot.data!;
                         if (medicines.isEmpty) {
-                          return Center(
-                            child: Text(loc.t('noMedicinesFound')),
-                          );
+                          return Center(child: Text(loc.t('noMedicinesFound')));
                         }
 
                         return GridView.builder(
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            childAspectRatio: 1.6,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
+                                crossAxisCount: 3,
+                                childAspectRatio: 1.6,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                              ),
                           itemCount: medicines.length,
                           itemBuilder: (context, index) {
                             final med = medicines[index];
@@ -336,9 +346,9 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 6,
-                                                  vertical: 2,
-                                                ),
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
                                                 decoration: BoxDecoration(
                                                   color: hasStock
                                                       ? Colors.green.shade50
@@ -352,8 +362,8 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                                                       : loc.t('emptyStock'),
                                                   style: TextStyle(
                                                     color: hasStock
-                                                      ? Colors.green.shade800
-                                                      : Colors.red.shade800,
+                                                        ? Colors.green.shade800
+                                                        : Colors.red.shade800,
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.w600,
                                                   ),
@@ -411,8 +421,13 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                       if (_cart.isNotEmpty)
                         TextButton(
                           onPressed: () => setState(() => _cart.clear()),
-                          child: Text(loc.t('clearCart'),
-                              style: const TextStyle(color: Colors.red, fontSize: 12)),
+                          child: Text(
+                            loc.t('clearCart'),
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -426,11 +441,16 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.remove_shopping_cart_outlined,
-                                  size: 48, color: Colors.grey.shade300),
+                              Icon(
+                                Icons.remove_shopping_cart_outlined,
+                                size: 48,
+                                color: Colors.grey.shade300,
+                              ),
                               const SizedBox(height: 12),
-                              Text(loc.t('cartEmpty'),
-                                  style: TextStyle(color: Colors.grey.shade500)),
+                              Text(
+                                loc.t('cartEmpty'),
+                                style: TextStyle(color: Colors.grey.shade500),
+                              ),
                             ],
                           ),
                         )
@@ -471,7 +491,9 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                                     IconButton(
                                       icon: const Icon(Icons.remove, size: 16),
                                       onPressed: () => _updateQuantity(
-                                          index, item.quantity - 1),
+                                        index,
+                                        item.quantity - 1,
+                                      ),
                                     ),
                                     Text(
                                       AppFormatters.quantity(item.quantity),
@@ -482,7 +504,9 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                                     IconButton(
                                       icon: const Icon(Icons.add, size: 16),
                                       onPressed: () => _updateQuantity(
-                                          index, item.quantity + 1),
+                                        index,
+                                        item.quantity + 1,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -520,8 +544,10 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text('${loc.t('discount')}:'),
-                            Text('-${AppFormatters.currency(_totalDiscount)}',
-                                style: const TextStyle(color: Colors.red)),
+                            Text(
+                              '-${AppFormatters.currency(_totalDiscount)}',
+                              style: const TextStyle(color: Colors.red),
+                            ),
                           ],
                         ),
                       ],
@@ -529,9 +555,13 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(loc.t('grandTotal'),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(
+                            loc.t('grandTotal'),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                           Text(
                             AppFormatters.currency(_grandTotal),
                             style: TextStyle(
@@ -549,7 +579,9 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                         decoration: InputDecoration(
                           labelText: loc.t('paymentMethod'),
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                         items: PaymentMethod.values.map((m) {
                           String label;
@@ -570,10 +602,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                               label = loc.t('other');
                               break;
                           }
-                          return DropdownMenuItem(
-                            value: m,
-                            child: Text(label),
-                          );
+                          return DropdownMenuItem(value: m, child: Text(label));
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) {
@@ -589,7 +618,9 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                           labelText: loc.t('paidAmount'),
                           hintText: AppFormatters.currency(_grandTotal),
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),

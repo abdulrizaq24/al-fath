@@ -19,6 +19,7 @@ class PrescriptionsPage extends ConsumerWidget {
   const PrescriptionsPage({super.key});
 
   void _showCreatePatientDialog(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
     final formKey = GlobalKey<FormState>();
     final nameCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
@@ -27,7 +28,7 @@ class PrescriptionsPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Tambah Data Pasien'),
+        title: Text(loc.t('addPatient')),
         content: Form(
           key: formKey,
           child: Column(
@@ -35,8 +36,11 @@ class PrescriptionsPage extends ConsumerWidget {
             children: [
               TextFormField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Nama Lengkap Pasien *'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
+                decoration: const InputDecoration(
+                  labelText: 'Patient Full Name *',
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -52,13 +56,18 @@ class PrescriptionsPage extends ConsumerWidget {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(loc.t('cancel')),
+          ),
           ElevatedButton(
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
-              final pharmacyId = ref.read(authStateProvider).currentPharmacy?.id ?? '';
+              final pharmacyId =
+                  ref.read(authStateProvider).currentPharmacy?.id ?? '';
               final patientDao = ref.read(patientDaoProvider);
-              final pNum = 'RM-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+              final pNum =
+                  'RM-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
               await patientDao.insert(
                 PatientsCompanion(
@@ -66,15 +75,23 @@ class PrescriptionsPage extends ConsumerWidget {
                   pharmacyId: drift.Value(pharmacyId),
                   patientNumber: drift.Value(pNum),
                   firstName: drift.Value(nameCtrl.text.trim()),
-                  phone: drift.Value(phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim()),
-                  address: drift.Value(addressCtrl.text.trim().isEmpty ? null : addressCtrl.text.trim()),
+                  phone: drift.Value(
+                    phoneCtrl.text.trim().isEmpty
+                        ? null
+                        : phoneCtrl.text.trim(),
+                  ),
+                  address: drift.Value(
+                    addressCtrl.text.trim().isEmpty
+                        ? null
+                        : addressCtrl.text.trim(),
+                  ),
                   createdAt: drift.Value(DateTime.now()),
                   updatedAt: drift.Value(DateTime.now()),
                 ),
               );
               if (context.mounted) Navigator.pop(ctx);
             },
-            child: const Text('Simpan'),
+            child: Text(loc.t('save')),
           ),
         ],
       ),
@@ -87,10 +104,11 @@ class PrescriptionsPage extends ConsumerWidget {
     List<Patient> patients,
     List<MedicineWithCategory> medicines,
   ) {
+    final loc = AppLocalizations.of(context);
     if (patients.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tambahkan pasien terlebih dahulu.'),
+        SnackBar(
+          content: Text(loc.t('patientAddedFirst')),
           backgroundColor: Colors.orange,
         ),
       );
@@ -98,8 +116,8 @@ class PrescriptionsPage extends ConsumerWidget {
     }
     if (medicines.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tambahkan obat terlebih dahulu.'),
+        SnackBar(
+          content: Text(loc.t('medicineAddedFirst')),
           backgroundColor: Colors.orange,
         ),
       );
@@ -111,13 +129,13 @@ class PrescriptionsPage extends ConsumerWidget {
     String selectedMedicineId = medicines.first.medicine.id;
     final doctorCtrl = TextEditingController(text: 'dr. ');
     final qtyCtrl = TextEditingController(text: '10');
-    final directionsCtrl = TextEditingController(text: '3 x 1 sehari sesudah makan');
+    final directionsCtrl = TextEditingController(text: loc.t('defaultDosage'));
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          title: const Text('Catat Resep Dokter'),
+          title: const Text('Record Prescription'),
           content: SizedBox(
             width: 500,
             child: Form(
@@ -127,7 +145,7 @@ class PrescriptionsPage extends ConsumerWidget {
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: selectedPatientId,
-                    decoration: const InputDecoration(labelText: 'Pasien *'),
+                    decoration: const InputDecoration(labelText: 'Patient *'),
                     items: patients.map((p) {
                       return DropdownMenuItem(
                         value: p.id,
@@ -141,17 +159,24 @@ class PrescriptionsPage extends ConsumerWidget {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: doctorCtrl,
-                    decoration: const InputDecoration(labelText: 'Nama Dokter Peresep *'),
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Prescribing Doctor Name *',
+                    ),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: selectedMedicineId,
-                    decoration: const InputDecoration(labelText: 'Obat Diresepkan *'),
+                    decoration: const InputDecoration(
+                      labelText: 'Prescribed Medicine *',
+                    ),
                     items: medicines.map((m) {
                       return DropdownMenuItem(
                         value: m.medicine.id,
-                        child: Text('${m.medicine.name} (${m.medicine.dosageForm})'),
+                        child: Text(
+                          '${m.medicine.name} (${m.medicine.dosageForm})',
+                        ),
                       );
                     }).toList(),
                     onChanged: (v) {
@@ -166,7 +191,9 @@ class PrescriptionsPage extends ConsumerWidget {
                         child: TextFormField(
                           controller: qtyCtrl,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'Kuantitas *'),
+                          decoration: const InputDecoration(
+                            labelText: 'Quantity *',
+                          ),
                           validator: (v) => double.tryParse(v ?? '') == null
                               ? 'Wajib angka'
                               : null,
@@ -177,7 +204,9 @@ class PrescriptionsPage extends ConsumerWidget {
                         flex: 2,
                         child: TextFormField(
                           controller: directionsCtrl,
-                          decoration: const InputDecoration(labelText: 'Signa / Aturan Pakai'),
+                          decoration: const InputDecoration(
+                            labelText: 'Signa / Aturan Pakai',
+                          ),
                         ),
                       ),
                     ],
@@ -187,7 +216,10 @@ class PrescriptionsPage extends ConsumerWidget {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(loc.t('cancel')),
+            ),
             ElevatedButton(
               onPressed: () async {
                 if (!formKey.currentState!.validate()) return;
@@ -195,7 +227,9 @@ class PrescriptionsPage extends ConsumerWidget {
                 final pharmacyId = authState.currentPharmacy?.id ?? '';
                 final userId = authState.currentUser?.id ?? '';
 
-                final prescriptionService = ref.read(prescriptionServiceProvider);
+                final prescriptionService = ref.read(
+                  prescriptionServiceProvider,
+                );
                 await prescriptionService.createPrescription(
                   pharmacyId: pharmacyId,
                   patientId: selectedPatientId,
@@ -212,7 +246,7 @@ class PrescriptionsPage extends ConsumerWidget {
                 );
                 if (context.mounted) Navigator.pop(ctx);
               },
-              child: const Text('Simpan Resep'),
+              child: const Text('Save Prescription'),
             ),
           ],
         ),
@@ -225,23 +259,28 @@ class PrescriptionsPage extends ConsumerWidget {
     WidgetRef ref,
     PrescriptionWithDetails prescription,
   ) {
+    final loc = AppLocalizations.of(context);
     final List<DispenseItemInput> dispenseInputs = [];
     double totalEstCost = 0.0;
 
     for (final it in prescription.items) {
       final remaining = it.item.quantityPrescribed - it.item.quantityDispensed;
       if (remaining > 0) {
-        dispenseInputs.add(DispenseItemInput(
-          prescriptionItemId: it.item.id,
-          quantityToDispense: remaining,
-        ));
+        dispenseInputs.add(
+          DispenseItemInput(
+            prescriptionItemId: it.item.id,
+            quantityToDispense: remaining,
+          ),
+        );
         totalEstCost += remaining * it.medicine.sellingPrice;
       }
     }
 
     if (dispenseInputs.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Resep ini sudah selesai dilayani sepenuhnya.')),
+        const SnackBar(
+          content: Text('This prescription has already been fully dispensed.'),
+        ),
       );
       return;
     }
@@ -249,18 +288,24 @@ class PrescriptionsPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Layani Resep: ${prescription.prescription.prescriptionNumber}'),
+        title: Text(
+          'Dispense Prescription: ${prescription.prescription.prescriptionNumber}',
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Pasien: ${prescription.patient.firstName}'),
+            Text('Patient: ${prescription.patient.firstName}'),
             Text('Dokter: ${prescription.prescription.prescriberName}'),
             const Divider(height: 20),
-            const Text('Obat yang akan diserahkan:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Medicines to dispense:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             ...prescription.items.map((it) {
-              final remaining = it.item.quantityPrescribed - it.item.quantityDispensed;
+              final remaining =
+                  it.item.quantityPrescribed - it.item.quantityDispensed;
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Text(
@@ -276,7 +321,10 @@ class PrescriptionsPage extends ConsumerWidget {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(loc.t('cancel')),
+          ),
           ElevatedButton(
             onPressed: () async {
               final authState = ref.read(authStateProvider);
@@ -299,7 +347,9 @@ class PrescriptionsPage extends ConsumerWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Resep berhasil dilayani & stok telah dipotong.'),
+                      content: Text(
+                        'Prescription dispensed and stock deducted.',
+                      ),
                       backgroundColor: Color(0xFF006D42),
                     ),
                   );
@@ -307,12 +357,15 @@ class PrescriptionsPage extends ConsumerWidget {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+                    SnackBar(
+                      content: Text(e.toString()),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               }
             },
-            child: const Text('Proses Dispensing & Bayar'),
+            child: const Text('Process Dispensing & Pay'),
           ),
         ],
       ),
@@ -361,7 +414,10 @@ class PrescriptionsPage extends ConsumerWidget {
                             const SizedBox(height: 4),
                             Text(
                               loc.t('prescriptionsSubtitle'),
-                              style: const TextStyle(color: Colors.grey, fontSize: 13),
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -370,7 +426,8 @@ class PrescriptionsPage extends ConsumerWidget {
                             OutlinedButton.icon(
                               icon: const Icon(Icons.person_add_outlined),
                               label: Text(loc.t('newPatient')),
-                              onPressed: () => _showCreatePatientDialog(context, ref),
+                              onPressed: () =>
+                                  _showCreatePatientDialog(context, ref),
                             ),
                             const SizedBox(width: 12),
                             ElevatedButton.icon(
@@ -406,72 +463,105 @@ class PrescriptionsPage extends ConsumerWidget {
                     final list = snapshot.data!;
                     if (list.isEmpty) {
                       return const Center(
-                        child: Text('Belum ada data resep dokter.'),
+                        child: Text('No prescription records yet.'),
                       );
                     }
 
                     return ListView.separated(
                       itemCount: list.length + 1,
-                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1),
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return Container(
                             color: Colors.grey.shade100,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             child: const Row(
                               children: [
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('No. Resep',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Prescription No.',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Pasien',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Patient',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Dokter Peresep',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Prescribing Doctor',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Tanggal',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Date',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Status',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Status',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Aksi',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Aksi',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           );
                         }
 
                         final item = list[index - 1];
-                        final canDispense = item.prescription.status ==
+                        final canDispense =
+                            item.prescription.status ==
                                 PrescriptionStatus.pending ||
                             item.prescription.status ==
                                 PrescriptionStatus.partiallyDispensed;
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           child: Row(
                             children: [
                               Expanded(
                                 flex: 2,
-                                child: Text(item.prescription.prescriptionNumber,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold)),
+                                child: Text(
+                                  item.prescription.prescriptionNumber,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                               Expanded(
                                 flex: 2,
@@ -483,23 +573,46 @@ class PrescriptionsPage extends ConsumerWidget {
                               ),
                               Expanded(
                                 flex: 2,
-                                child: Text(AppFormatters.date(
-                                    item.prescription.prescriptionDate)),
+                                child: Text(
+                                  AppFormatters.date(
+                                    item.prescription.prescriptionDate,
+                                  ),
+                                ),
                               ),
                               Expanded(
                                 flex: 2,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
-                                  child: item.prescription.status ==
+                                  child:
+                                      item.prescription.status ==
                                           PrescriptionStatus.dispensed
                                       ? StatusBadge.success(
-                                          item.prescription.status.label)
+                                          loc.t(
+                                            item
+                                                .prescription
+                                                .status
+                                                .localizationKey,
+                                          ),
+                                        )
                                       : item.prescription.status ==
-                                              PrescriptionStatus.partiallyDispensed
-                                          ? StatusBadge.warning(
-                                              item.prescription.status.label)
-                                          : StatusBadge.info(
-                                              item.prescription.status.label),
+                                            PrescriptionStatus
+                                                .partiallyDispensed
+                                      ? StatusBadge.warning(
+                                          loc.t(
+                                            item
+                                                .prescription
+                                                .status
+                                                .localizationKey,
+                                          ),
+                                        )
+                                      : StatusBadge.info(
+                                          loc.t(
+                                            item
+                                                .prescription
+                                                .status
+                                                .localizationKey,
+                                          ),
+                                        ),
                                 ),
                               ),
                               Expanded(
@@ -507,11 +620,15 @@ class PrescriptionsPage extends ConsumerWidget {
                                 child: canDispense
                                     ? OutlinedButton.icon(
                                         icon: const Icon(
-                                            Icons.medical_services_outlined,
-                                            size: 16),
+                                          Icons.medical_services_outlined,
+                                          size: 16,
+                                        ),
                                         label: const Text('Dispensing'),
-                                        onPressed: () =>
-                                            _showDispenseDialog(context, ref, item),
+                                        onPressed: () => _showDispenseDialog(
+                                          context,
+                                          ref,
+                                          item,
+                                        ),
                                       )
                                     : const Text('-'),
                               ),

@@ -58,11 +58,7 @@ class PrescriptionService implements IPrescriptionService {
   final IPrescriptionDao _prescriptionDao;
   final ISaleService _saleService;
 
-  const PrescriptionService(
-    this._db,
-    this._prescriptionDao,
-    this._saleService,
-  );
+  const PrescriptionService(this._db, this._prescriptionDao, this._saleService);
 
   String _generateRxNumber() {
     final now = DateTime.now();
@@ -82,7 +78,9 @@ class PrescriptionService implements IPrescriptionService {
     String? notes,
   }) async {
     if (items.isEmpty) {
-      throw const ValidationException('Resep harus memiliki minimal 1 item obat.');
+      throw const ValidationException(
+        'A prescription must contain at least one medicine.',
+      );
     }
 
     final prescriptionId = UuidGenerator.v4();
@@ -136,13 +134,13 @@ class PrescriptionService implements IPrescriptionService {
   }) async {
     final prescription = await _prescriptionDao.getById(prescriptionId);
     if (prescription == null) {
-      throw const NotFoundException('Resep tidak ditemukan.');
+      throw const NotFoundException('Prescription not found.');
     }
 
     if (prescription.prescription.status == PrescriptionStatus.dispensed ||
         prescription.prescription.status == PrescriptionStatus.cancelled) {
       throw BusinessLogicException(
-        'Resep dengan status ${prescription.prescription.status.name} tidak dapat diproses.',
+        'Prescription with status ${prescription.prescription.status.name} cannot be processed.',
       );
     }
 
@@ -162,22 +160,26 @@ class PrescriptionService implements IPrescriptionService {
 
       if (newTotalDispensed > pItem.item.quantityPrescribed) {
         throw ValidationException(
-          'Kuantitas pengambilan melebihi resep untuk obat ${pItem.medicine.name}.',
+          'Dispensed quantity exceeds the prescribed quantity for ${pItem.medicine.name}.',
         );
       }
 
       updatedQuantities[pItem.item.id] = newTotalDispensed;
 
-      cartItems.add(SaleCartItemInput(
-        medicineId: pItem.medicine.id,
-        medicineName: pItem.medicine.name,
-        quantity: dispenseReq.quantityToDispense,
-        unitPrice: pItem.medicine.sellingPrice,
-      ));
+      cartItems.add(
+        SaleCartItemInput(
+          medicineId: pItem.medicine.id,
+          medicineName: pItem.medicine.name,
+          quantity: dispenseReq.quantityToDispense,
+          unitPrice: pItem.medicine.sellingPrice,
+        ),
+      );
     }
 
     if (cartItems.isEmpty) {
-      throw const ValidationException('Tidak ada item yang dapat dilayani.');
+      throw const ValidationException(
+        'There are no items available to dispense.',
+      );
     }
 
     // Eksekusi penjualan kasir & pemotongan FEFO melalui SaleService

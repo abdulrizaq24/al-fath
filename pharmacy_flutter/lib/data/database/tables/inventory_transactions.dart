@@ -3,7 +3,6 @@ import '../../../domain/enums/app_enums.dart';
 import 'batches.dart';
 import 'medicines.dart';
 import 'pharmacies.dart';
-import 'users.dart';
 
 @TableIndex(name: 'inv_trans_pharmacy_id_idx', columns: {#pharmacyId})
 @TableIndex(name: 'inv_trans_medicine_id_idx', columns: {#medicineId})
@@ -15,12 +14,12 @@ class InventoryTransactions extends Table {
   TextColumn get medicineId => text().references(Medicines, #id)();
   TextColumn get batchId => text().references(Batches, #id)();
   IntColumn get transactionType => intEnum<InventoryTransactionType>()();
-  RealColumn get quantity => real()();
+  IntColumn get quantity => integer()();
   IntColumn get referenceType => intEnum<ReferenceType>()();
   TextColumn get referenceId => text().nullable()();
   TextColumn get reason => text().nullable()();
-  TextColumn get createdById => text().references(Users, #id)();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get createdById => text().nullable()();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -19,6 +19,7 @@ import 'tables/purchase_receipts.dart';
 import 'tables/purchases.dart';
 import 'tables/roles.dart';
 import 'tables/sale_item_batches.dart';
+import 'tables/sale_idempotency.dart';
 import 'tables/sale_items.dart';
 import 'tables/sales.dart';
 import 'tables/suppliers.dart';
@@ -46,6 +47,7 @@ part 'database.g.dart';
     Sales,
     SaleItems,
     SaleItemBatches,
+    SaleIdempotency,
     Payments,
     InventoryTransactions,
     AuditLogs,
@@ -59,11 +61,11 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await m.createAll();
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON;');
-        },
-      );
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON;');
+    },
+  );
 }

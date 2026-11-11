@@ -38,11 +38,9 @@ abstract class IPrescriptionDao {
   });
   Future<PrescriptionWithDetails?> getById(String id);
   Future<Prescription> insertPrescription(PrescriptionsCompanion entry);
-  Future<void> insertPrescriptionItems(
-      List<PrescriptionItemsCompanion> items);
+  Future<void> insertPrescriptionItems(List<PrescriptionItemsCompanion> items);
   Future<bool> updateStatus(String id, PrescriptionStatus status);
-  Future<bool> updateItemDispensedQuantity(
-      String itemId, double newQuantity);
+  Future<bool> updateItemDispensedQuantity(String itemId, double newQuantity);
 }
 
 class PrescriptionDao implements IPrescriptionDao {
@@ -99,18 +97,18 @@ class PrescriptionDao implements IPrescriptionDao {
 
   @override
   Future<PrescriptionWithDetails?> getById(String id) async {
-    final prescription = await (_db.select(_db.prescriptions)
-          ..where((tbl) => tbl.id.equals(id)))
-        .getSingleOrNull();
+    final prescription = await (_db.select(
+      _db.prescriptions,
+    )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
     if (prescription == null) return null;
 
-    final patient = await (_db.select(_db.patients)
-          ..where((tbl) => tbl.id.equals(prescription.patientId)))
-        .getSingle();
+    final patient = await (_db.select(
+      _db.patients,
+    )..where((tbl) => tbl.id.equals(prescription.patientId))).getSingle();
 
-    final user = await (_db.select(_db.users)
-          ..where((tbl) => tbl.id.equals(prescription.createdById)))
-        .getSingle();
+    final user = await (_db.select(
+      _db.users,
+    )..where((tbl) => tbl.id.equals(prescription.createdById))).getSingle();
 
     final itemsQuery = _db.select(_db.prescriptionItems).join([
       innerJoin(
@@ -136,14 +134,14 @@ class PrescriptionDao implements IPrescriptionDao {
   }
 
   @override
-  Future<Prescription> insertPrescription(
-      PrescriptionsCompanion entry) async {
+  Future<Prescription> insertPrescription(PrescriptionsCompanion entry) async {
     return _db.into(_db.prescriptions).insertReturning(entry);
   }
 
   @override
   Future<void> insertPrescriptionItems(
-      List<PrescriptionItemsCompanion> items) async {
+    List<PrescriptionItemsCompanion> items,
+  ) async {
     await _db.batch((b) {
       b.insertAll(_db.prescriptionItems, items);
     });
@@ -151,14 +149,15 @@ class PrescriptionDao implements IPrescriptionDao {
 
   @override
   Future<bool> updateStatus(String id, PrescriptionStatus status) async {
-    final count = await (_db.update(_db.prescriptions)
-          ..where((tbl) => tbl.id.equals(id)))
-        .write(
-      PrescriptionsCompanion(
-        status: Value(status),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final count =
+        await (_db.update(
+          _db.prescriptions,
+        )..where((tbl) => tbl.id.equals(id))).write(
+          PrescriptionsCompanion(
+            status: Value(status),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
     return count > 0;
   }
 
@@ -167,14 +166,15 @@ class PrescriptionDao implements IPrescriptionDao {
     String itemId,
     double newQuantity,
   ) async {
-    final count = await (_db.update(_db.prescriptionItems)
-          ..where((tbl) => tbl.id.equals(itemId)))
-        .write(
-      PrescriptionItemsCompanion(
-        quantityDispensed: Value(newQuantity),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final count =
+        await (_db.update(
+          _db.prescriptionItems,
+        )..where((tbl) => tbl.id.equals(itemId))).write(
+          PrescriptionItemsCompanion(
+            quantityDispensed: Value(newQuantity),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
     return count > 0;
   }
 }

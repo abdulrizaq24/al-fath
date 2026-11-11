@@ -31,10 +31,7 @@ class SupplierDao implements ISupplierDao {
   }
 
   @override
-  Stream<List<Supplier>> watchAll(
-    String pharmacyId, {
-    bool activeOnly = true,
-  }) {
+  Stream<List<Supplier>> watchAll(String pharmacyId, {bool activeOnly = true}) {
     final query = _db.select(_db.suppliers)
       ..where((tbl) => tbl.pharmacyId.equals(pharmacyId));
     if (activeOnly) {
@@ -62,9 +59,9 @@ class SupplierDao implements ISupplierDao {
 
   @override
   Future<bool> toggleActive(String id, bool isActive) async {
-    final count = await (_db.update(_db.suppliers)
-          ..where((tbl) => tbl.id.equals(id)))
-        .write(SuppliersCompanion(isActive: Value(isActive)));
+    final count =
+        await (_db.update(_db.suppliers)..where((tbl) => tbl.id.equals(id)))
+            .write(SuppliersCompanion(isActive: Value(isActive)));
     return count > 0;
   }
 }

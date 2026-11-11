@@ -19,7 +19,10 @@ abstract class IInventoryService {
   });
 
   Future<List<LowStockMedicine>> getLowStockMedicines(String pharmacyId);
-  Future<List<Batche>> getExpiringBatches(String pharmacyId, {int daysThreshold});
+  Future<List<Batche>> getExpiringBatches(
+    String pharmacyId, {
+    int daysThreshold,
+  });
   Future<List<Batche>> getExpiredBatches(String pharmacyId);
 }
 
@@ -28,11 +31,7 @@ class InventoryService implements IInventoryService {
   final IBatchDao _batchDao;
   final IInventoryDao _inventoryDao;
 
-  const InventoryService(
-    this._db,
-    this._batchDao,
-    this._inventoryDao,
-  );
+  const InventoryService(this._db, this._batchDao, this._inventoryDao);
 
   @override
   Future<void> adjustStock({
@@ -45,12 +44,12 @@ class InventoryService implements IInventoryService {
     required String userId,
   }) async {
     if (newPhysicalQuantity < 0) {
-      throw const ValidationException('Kuantitas fisik tidak boleh negatif.');
+      throw const ValidationException('Physical quantity cannot be negative.');
     }
 
     final batch = await _batchDao.getById(batchId);
     if (batch == null) {
-      throw const NotFoundException('Batch obat tidak ditemukan.');
+      throw const NotFoundException('Medicine batch not found.');
     }
 
     final delta = newPhysicalQuantity - batch.currentQuantity;
@@ -77,9 +76,7 @@ class InventoryService implements IInventoryService {
   }
 
   @override
-  Future<List<LowStockMedicine>> getLowStockMedicines(
-    String pharmacyId,
-  ) async {
+  Future<List<LowStockMedicine>> getLowStockMedicines(String pharmacyId) async {
     return _inventoryDao.getLowStockMedicines(pharmacyId);
   }
 

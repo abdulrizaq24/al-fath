@@ -5,8 +5,8 @@ class Roles extends Table {
   TextColumn get id => text()();
   IntColumn get name => intEnum<RoleName>().unique()();
   TextColumn get description => text().nullable()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

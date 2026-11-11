@@ -6,10 +6,7 @@ class AuditLogWithUser {
   final AuditLog log;
   final User user;
 
-  const AuditLogWithUser({
-    required this.log,
-    required this.user,
-  });
+  const AuditLogWithUser({required this.log, required this.user});
 }
 
 abstract class IAuditDao {
@@ -40,10 +37,7 @@ class AuditDao implements IAuditDao {
     int limit = 100,
   }) async {
     final query = _db.select(_db.auditLogs).join([
-      innerJoin(
-        _db.users,
-        _db.users.id.equalsExp(_db.auditLogs.userId),
-      ),
+      innerJoin(_db.users, _db.users.id.equalsExp(_db.auditLogs.userId)),
     ])..where(_db.auditLogs.pharmacyId.equals(pharmacyId));
 
     if (entityType != null && entityType.isNotEmpty) {

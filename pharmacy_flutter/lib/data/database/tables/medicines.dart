@@ -21,13 +21,13 @@ class Medicines extends Table {
   TextColumn get baseUnit => text()();
   IntColumn get prescriptionStatus =>
       intEnum<ControlledStatus>().withDefault(const Constant(0))();
-  RealColumn get sellingPrice => real()();
-  RealColumn get reorderLevel => real().withDefault(const Constant(0.0))();
+  IntColumn get sellingPrice => integer()();
+  IntColumn get reorderLevel => integer().withDefault(const Constant(0))();
   TextColumn get barcode => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   TextColumn get notes => text().nullable()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

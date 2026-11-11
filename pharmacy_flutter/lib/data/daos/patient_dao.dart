@@ -25,11 +25,13 @@ class PatientDao implements IPatientDao {
 
     if (searchQuery != null && searchQuery.trim().isNotEmpty) {
       final term = '%${searchQuery.trim().toLowerCase()}%';
-      query.where((tbl) =>
-          tbl.firstName.lower().like(term) |
-          tbl.lastName.lower().like(term) |
-          tbl.patientNumber.lower().like(term) |
-          tbl.phone.lower().like(term));
+      query.where(
+        (tbl) =>
+            tbl.firstName.lower().like(term) |
+            tbl.lastName.lower().like(term) |
+            tbl.patientNumber.lower().like(term) |
+            tbl.phone.lower().like(term),
+      );
     }
 
     query.orderBy([(tbl) => OrderingTerm.asc(tbl.firstName)]);
@@ -37,18 +39,12 @@ class PatientDao implements IPatientDao {
   }
 
   @override
-  Future<List<Patient>> getAll(
-    String pharmacyId, {
-    String? searchQuery,
-  }) async {
+  Future<List<Patient>> getAll(String pharmacyId, {String? searchQuery}) async {
     return _buildQuery(pharmacyId, searchQuery: searchQuery).get();
   }
 
   @override
-  Stream<List<Patient>> watchAll(
-    String pharmacyId, {
-    String? searchQuery,
-  }) {
+  Stream<List<Patient>> watchAll(String pharmacyId, {String? searchQuery}) {
     return _buildQuery(pharmacyId, searchQuery: searchQuery).watch();
   }
 
@@ -64,9 +60,11 @@ class PatientDao implements IPatientDao {
     String patientNumber,
   ) async {
     final query = _db.select(_db.patients)
-      ..where((tbl) =>
-          tbl.pharmacyId.equals(pharmacyId) &
-          tbl.patientNumber.equals(patientNumber));
+      ..where(
+        (tbl) =>
+            tbl.pharmacyId.equals(pharmacyId) &
+            tbl.patientNumber.equals(patientNumber),
+      );
     return query.getSingleOrNull();
   }
 

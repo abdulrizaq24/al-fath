@@ -63,8 +63,10 @@ class AuthDao implements IAuthDao {
 
   @override
   Future<bool> updateUser(UsersCompanion entry) async {
-    final count = await _db.update(_db.users).replace(entry);
-    return count;
+    final count = await (_db.update(
+      _db.users,
+    )..where((tbl) => tbl.id.equals(entry.id.value))).write(entry);
+    return count > 0;
   }
 
   @override

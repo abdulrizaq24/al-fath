@@ -43,13 +43,16 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
 
     setState(() => _isSubmitting = true);
     try {
-      await ref.read(authStateProvider.notifier).setupPharmacy(
+      await ref
+          .read(authStateProvider.notifier)
+          .setupPharmacy(
             pharmacyName: _pharmacyNameController.text,
             licenseNumber: _licenseController.text.isEmpty
                 ? null
                 : _licenseController.text,
-            address:
-                _addressController.text.isEmpty ? null : _addressController.text,
+            address: _addressController.text.isEmpty
+                ? null
+                : _addressController.text,
             phone: _phoneController.text.isEmpty ? null : _phoneController.text,
             adminName: _adminNameController.text,
             adminUsername: _usernameController.text,
@@ -58,10 +61,7 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -104,7 +104,9 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -152,8 +154,9 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
                       labelText: '${loc.t('pharmacyName')} *',
                       prefixIcon: const Icon(Icons.storefront),
                     ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? loc.t('required') : null,
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? loc.t('required')
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -202,8 +205,9 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
                       labelText: '${loc.t('adminFullName')} *',
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? loc.t('required') : null,
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? loc.t('required')
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -213,7 +217,9 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
                           controller: _usernameController,
                           decoration: InputDecoration(
                             labelText: '${loc.t('username')} *',
-                            prefixIcon: const Icon(Icons.account_circle_outlined),
+                            prefixIcon: const Icon(
+                              Icons.account_circle_outlined,
+                            ),
                           ),
                           validator: (v) => v == null || v.trim().isEmpty
                               ? loc.t('required')
@@ -229,9 +235,8 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
                             labelText: '${loc.t('password')} *',
                             prefixIcon: const Icon(Icons.lock_outline),
                           ),
-                          validator: (v) => v == null || v.length < 6
-                              ? 'Min. 6 chars'
-                              : null,
+                          validator: (v) =>
+                              v == null || v.length < 6 ? 'Min. 6 chars' : null,
                         ),
                       ),
                     ],

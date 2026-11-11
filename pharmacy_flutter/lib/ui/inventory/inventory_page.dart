@@ -39,9 +39,11 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
     MedicineWithCategory medicine,
     Batche batch,
   ) {
+    final loc = AppLocalizations.of(context);
     final formKey = GlobalKey<FormState>();
-    final newQtyCtrl =
-        TextEditingController(text: batch.currentQuantity.toString());
+    final newQtyCtrl = TextEditingController(
+      text: batch.currentQuantity.toString(),
+    );
     final reasonCtrl = TextEditingController();
     InventoryTransactionType selectedType = InventoryTransactionType.adjustment;
 
@@ -49,33 +51,35 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          title: Text('Penyesuaian Stok: ${medicine.medicine.name}'),
+          title: Text('${loc.t('adjustStock')}: ${medicine.medicine.name}'),
           content: Form(
             key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('No. Batch: ${batch.batchNumber}'),
+                Text('${loc.t('batchNumber')}: ${batch.batchNumber}'),
                 Text(
-                  'Stok Saat Ini: ${AppFormatters.quantity(batch.currentQuantity)} ${medicine.medicine.baseUnit}',
+                  'Current Stock: ${AppFormatters.quantity(batch.currentQuantity)} ${medicine.medicine.baseUnit}',
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<InventoryTransactionType>(
                   initialValue: selectedType,
-                  decoration: const InputDecoration(labelText: 'Tipe Penyesuaian'),
-                  items: const [
+                  decoration: InputDecoration(
+                    labelText: loc.t('adjustmentType'),
+                  ),
+                  items: [
                     DropdownMenuItem(
                       value: InventoryTransactionType.adjustment,
-                      child: Text('Penyesuaian (Stock Opname)'),
+                      child: Text(loc.t('inventoryAdjustment')),
                     ),
                     DropdownMenuItem(
                       value: InventoryTransactionType.damage,
-                      child: Text('Kerusakan Fisik'),
+                      child: Text(loc.t('physicalDamage')),
                     ),
                     DropdownMenuItem(
                       value: InventoryTransactionType.expiry,
-                      child: Text('Kadaluarsa / Rusak'),
+                      child: Text(loc.t('expiredDamaged')),
                     ),
                   ],
                   onChanged: (v) {
@@ -86,21 +90,21 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                 TextFormField(
                   controller: newQtyCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Kuantitas Fisik Riil *',
+                  decoration: InputDecoration(
+                    labelText: '${loc.t('actualQuantity')} *',
                   ),
                   validator: (v) => double.tryParse(v ?? '') == null
-                      ? 'Angka valid wajib'
+                      ? loc.t('validNumber')
                       : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: reasonCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Alasan Penyesuaian *',
+                  decoration: InputDecoration(
+                    labelText: '${loc.t('adjustmentReason')} *',
                   ),
                   validator: (v) => v == null || v.trim().isEmpty
-                      ? 'Alasan wajib diisi'
+                      ? loc.t('adjustmentReasonRequired')
                       : null,
                 ),
               ],
@@ -109,7 +113,7 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Batal'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -124,8 +128,7 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                     pharmacyId: pharmacyId,
                     medicineId: medicine.medicine.id,
                     batchId: batch.id,
-                    newPhysicalQuantity:
-                        double.parse(newQtyCtrl.text.trim()),
+                    newPhysicalQuantity: double.parse(newQtyCtrl.text.trim()),
                     type: selectedType,
                     reason: reasonCtrl.text.trim(),
                     userId: userId,
@@ -135,12 +138,15 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+                      SnackBar(
+                        content: Text(e.toString()),
+                        backgroundColor: Colors.red,
+                      ),
                     );
                   }
                 }
               },
-              child: const Text('Simpan Koreksi'),
+              child: const Text('Save Correction'),
             ),
           ],
         ),
@@ -197,17 +203,20 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                       stream: medicineDao.watchAll(pharmacyId),
                       builder: (context, medSnap) {
                         if (!medSnap.hasData) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
 
                         final medicines = medSnap.data!;
                         if (medicines.isEmpty) {
-                          return const Center(child: Text('Belum ada data obat.'));
+                          return Center(child: Text(loc.t('noData')));
                         }
 
                         return ListView.separated(
                           itemCount: medicines.length,
-                          separatorBuilder: (context, index) => const Divider(height: 1),
+                          separatorBuilder: (context, index) =>
+                              const Divider(height: 1),
                           itemBuilder: (context, index) {
                             final med = medicines[index];
 
@@ -219,30 +228,41 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                               builder: (context, batchSnap) {
                                 final batches = batchSnap.data ?? [];
                                 final totalStock = batches.fold<double>(
-                                    0.0, (s, b) => s + b.currentQuantity);
+                                  0.0,
+                                  (s, b) => s + b.currentQuantity,
+                                );
 
                                 return ExpansionTile(
                                   title: Text(
                                     med.medicine.name,
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   subtitle: Text(
-                                    'Total Stok: ${AppFormatters.quantity(totalStock)} ${med.medicine.baseUnit} | Reorder Level: ${AppFormatters.quantity(med.medicine.reorderLevel)}',
+                                    'Total Stock: ${AppFormatters.quantity(totalStock)} ${med.medicine.baseUnit} | Reorder Level: ${AppFormatters.quantity(med.medicine.reorderLevel)}',
                                   ),
                                   children: batches.isEmpty
                                       ? [
                                           const Padding(
                                             padding: EdgeInsets.all(12),
-                                            child: Text('Belum ada batch barang masuk.'),
-                                          )
+                                            child: Text(
+                                              'Belum ada batch barang masuk.',
+                                            ),
+                                          ),
                                         ]
                                       : batches.map((b) {
                                           return ListTile(
                                             dense: true,
-                                            leading: const Icon(Icons.qr_code, size: 20),
-                                            title: Text('No. Batch: ${b.batchNumber}'),
+                                            leading: const Icon(
+                                              Icons.qr_code,
+                                              size: 20,
+                                            ),
+                                            title: Text(
+                                              'No. Batch: ${b.batchNumber}',
+                                            ),
                                             subtitle: Text(
-                                              'Exp: ${AppFormatters.date(b.expiryDate)} | Harga Beli: ${AppFormatters.currency(b.purchasePrice)}',
+                                              'Exp: ${AppFormatters.date(b.expiryDate)} | Purchase Price: ${AppFormatters.currency(b.purchasePrice)}',
                                             ),
                                             trailing: Row(
                                               mainAxisSize: MainAxisSize.min,
@@ -255,13 +275,17 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                                                 ),
                                                 const SizedBox(width: 8),
                                                 IconButton(
-                                                  icon: const Icon(Icons.edit_note),
-                                                  tooltip: 'Koreksi Stok (Opname)',
-                                                  onPressed: () => _showAdjustStockDialog(
-                                                    context,
-                                                    med,
-                                                    b,
+                                                  icon: const Icon(
+                                                    Icons.edit_note,
                                                   ),
+                                                  tooltip:
+                                                      'Stock Adjustment (Stocktake)',
+                                                  onPressed: () =>
+                                                      _showAdjustStockDialog(
+                                                        context,
+                                                        med,
+                                                        b,
+                                                      ),
                                                 ),
                                               ],
                                             ),
@@ -279,34 +303,47 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                   // Tab 2: Expiring Batches
                   Card(
                     child: FutureBuilder<List<Batche>>(
-                      future: inventoryService.getExpiringBatches(pharmacyId, daysThreshold: 60),
+                      future: inventoryService.getExpiringBatches(
+                        pharmacyId,
+                        daysThreshold: 60,
+                      ),
                       builder: (context, snap) {
                         if (snap.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
 
                         final batches = snap.data ?? [];
                         if (batches.isEmpty) {
                           return const Center(
-                            child: Text('Aman! Tidak ada obat yang mendekati kadaluarsa.'),
+                            child: Text(
+                              'All clear! No medicines are nearing expiry.',
+                            ),
                           );
                         }
 
                         return ListView.separated(
                           itemCount: batches.length,
-                          separatorBuilder: (context, index) => const Divider(height: 1),
+                          separatorBuilder: (context, index) =>
+                              const Divider(height: 1),
                           itemBuilder: (context, index) {
                             final b = batches[index];
-                            final daysLeft = b.expiryDate.difference(DateTime.now()).inDays;
+                            final daysLeft = b.expiryDate
+                                .difference(DateTime.now())
+                                .inDays;
 
                             return ListTile(
-                              leading: const Icon(Icons.warning, color: Colors.amber),
+                              leading: const Icon(
+                                Icons.warning,
+                                color: Colors.amber,
+                              ),
                               title: Text('Batch: ${b.batchNumber}'),
                               subtitle: Text(
-                                'Kadaluarsa: ${AppFormatters.date(b.expiryDate)} ($daysLeft hari lagi)',
+                                'Kadaluarsa: ${AppFormatters.date(b.expiryDate)} ($daysLeft days remaining)',
                               ),
                               trailing: StatusBadge.warning(
-                                'Sisa: ${AppFormatters.quantity(b.currentQuantity)}',
+                                'Remaining: ${AppFormatters.quantity(b.currentQuantity)}',
                               ),
                             );
                           },
@@ -321,17 +358,20 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                       future: inventoryDao.getTransactions(pharmacyId),
                       builder: (context, snap) {
                         if (snap.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
 
                         final txs = snap.data ?? [];
                         if (txs.isEmpty) {
-                          return const Center(child: Text('Belum ada riwayat mutasi stok.'));
+                          return Center(child: Text(loc.t('noMutations')));
                         }
 
                         return ListView.separated(
                           itemCount: txs.length,
-                          separatorBuilder: (context, index) => const Divider(height: 1),
+                          separatorBuilder: (context, index) =>
+                              const Divider(height: 1),
                           itemBuilder: (context, index) {
                             final tx = txs[index];
                             final isPlus = tx.transaction.quantity > 0;
@@ -339,18 +379,24 @@ class _InventoryPageState extends ConsumerState<InventoryPage>
                             return ListTile(
                               dense: true,
                               leading: Icon(
-                                isPlus ? Icons.arrow_downward : Icons.arrow_upward,
+                                isPlus
+                                    ? Icons.arrow_downward
+                                    : Icons.arrow_upward,
                                 color: isPlus ? Colors.green : Colors.red,
                               ),
-                              title: Text('${tx.medicine.name} (Batch: ${tx.batch.batchNumber})'),
+                              title: Text(
+                                '${tx.medicine.name} (Batch: ${tx.batch.batchNumber})',
+                              ),
                               subtitle: Text(
-                                '${tx.transaction.reason ?? tx.transaction.transactionType.label} • Oleh: ${tx.createdBy.name} • ${AppFormatters.dateTime(tx.transaction.createdAt)}',
+                                '${tx.transaction.reason ?? loc.t(tx.transaction.transactionType.localizationKey)} • Oleh: ${tx.createdBy.name} • ${AppFormatters.dateTime(tx.transaction.createdAt)}',
                               ),
                               trailing: Text(
                                 '${isPlus ? "+" : ""}${AppFormatters.quantity(tx.transaction.quantity)}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: isPlus ? Colors.green.shade800 : Colors.red.shade800,
+                                  color: isPlus
+                                      ? Colors.green.shade800
+                                      : Colors.red.shade800,
                                 ),
                               ),
                             );

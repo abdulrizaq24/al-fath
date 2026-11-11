@@ -30,10 +30,11 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
   }
 
   void _showAddMedicineDialog(List<Category> categories) {
+    final loc = AppLocalizations.of(context);
     if (categories.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Buat kategori obat terlebih dahulu.'),
+        SnackBar(
+          content: Text(loc.t('createCategoryFirst')),
           backgroundColor: Colors.orange,
         ),
       );
@@ -55,7 +56,7 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          title: const Text('Tambah Obat Baru'),
+          title: Text(loc.t('newMedicine')),
           content: SizedBox(
             width: 500,
             child: Form(
@@ -66,9 +67,11 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                   children: [
                     TextFormField(
                       controller: nameCtrl,
-                      decoration: const InputDecoration(labelText: 'Nama Obat *'),
+                      decoration: const InputDecoration(
+                        labelText: 'Medicine Name *',
+                      ),
                       validator: (v) => v == null || v.trim().isEmpty
-                          ? 'Nama obat wajib diisi'
+                          ? 'Medicine name is required'
                           : null,
                     ),
                     const SizedBox(height: 12),
@@ -77,16 +80,18 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                         Expanded(
                           child: TextFormField(
                             controller: genericCtrl,
-                            decoration: const InputDecoration(
-                                labelText: 'Nama Generik'),
+                            decoration: InputDecoration(
+                              labelText: loc.t('genericName'),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: TextFormField(
                             controller: barcodeCtrl,
-                            decoration:
-                                const InputDecoration(labelText: 'Barcode / Kode'),
+                            decoration: InputDecoration(
+                              labelText: loc.t('barcode'),
+                            ),
                           ),
                         ),
                       ],
@@ -94,9 +99,14 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: selectedCatId,
-                      decoration: const InputDecoration(labelText: 'Kategori *'),
+                      decoration: InputDecoration(
+                        labelText: '${loc.t('category')} *',
+                      ),
                       items: categories.map((c) {
-                        return DropdownMenuItem(value: c.id, child: Text(c.name));
+                        return DropdownMenuItem(
+                          value: c.id,
+                          child: Text(c.name),
+                        );
                       }).toList(),
                       onChanged: (v) {
                         if (v != null) setDlgState(() => selectedCatId = v);
@@ -108,10 +118,11 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                         Expanded(
                           child: TextFormField(
                             controller: dosageCtrl,
-                            decoration: const InputDecoration(
-                                labelText: 'Bentuk Sediaan *'),
+                            decoration: InputDecoration(
+                              labelText: '${loc.t('dosageForm')} *',
+                            ),
                             validator: (v) => v == null || v.trim().isEmpty
-                                ? 'Wajib diisi'
+                                ? loc.t('requiredField')
                                 : null,
                           ),
                         ),
@@ -119,10 +130,11 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                         Expanded(
                           child: TextFormField(
                             controller: baseUnitCtrl,
-                            decoration: const InputDecoration(
-                                labelText: 'Satuan Dasar *'),
+                            decoration: InputDecoration(
+                              labelText: '${loc.t('baseUnit')} *',
+                            ),
                             validator: (v) => v == null || v.trim().isEmpty
-                                ? 'Wajib diisi'
+                                ? loc.t('requiredField')
                                 : null,
                           ),
                         ),
@@ -135,10 +147,11 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                           child: TextFormField(
                             controller: priceCtrl,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                                labelText: 'Harga Jual (Rp) *'),
+                            decoration: InputDecoration(
+                              labelText: '${loc.t('sellingPrice')} *',
+                            ),
                             validator: (v) => double.tryParse(v ?? '') == null
-                                ? 'Harga valid wajib'
+                                ? loc.t('requiredField')
                                 : null,
                           ),
                         ),
@@ -147,8 +160,9 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                           child: TextFormField(
                             controller: reorderCtrl,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                                labelText: 'Batas Minimum Stok'),
+                            decoration: InputDecoration(
+                              labelText: loc.t('reorderLevel'),
+                            ),
                           ),
                         ),
                       ],
@@ -156,10 +170,14 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<ControlledStatus>(
                       initialValue: selectedStatus,
-                      decoration:
-                          const InputDecoration(labelText: 'Regulasi / Golongan'),
+                      decoration: InputDecoration(
+                        labelText: loc.t('regulation'),
+                      ),
                       items: ControlledStatus.values.map((s) {
-                        return DropdownMenuItem(value: s, child: Text(s.label));
+                        return DropdownMenuItem(
+                          value: s,
+                          child: Text(loc.t(s.localizationKey)),
+                        );
                       }).toList(),
                       onChanged: (v) {
                         if (v != null) setDlgState(() => selectedStatus = v);
@@ -173,7 +191,7 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Batal'),
+              child: Text(loc.t('cancel')),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -188,18 +206,24 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                     pharmacyId: drift.Value(pharmacyId),
                     categoryId: drift.Value(selectedCatId),
                     name: drift.Value(nameCtrl.text.trim()),
-                    genericName: drift.Value(genericCtrl.text.trim().isEmpty
-                        ? null
-                        : genericCtrl.text.trim()),
-                    barcode: drift.Value(barcodeCtrl.text.trim().isEmpty
-                        ? null
-                        : barcodeCtrl.text.trim()),
+                    genericName: drift.Value(
+                      genericCtrl.text.trim().isEmpty
+                          ? null
+                          : genericCtrl.text.trim(),
+                    ),
+                    barcode: drift.Value(
+                      barcodeCtrl.text.trim().isEmpty
+                          ? null
+                          : barcodeCtrl.text.trim(),
+                    ),
                     dosageForm: drift.Value(dosageCtrl.text.trim()),
                     baseUnit: drift.Value(baseUnitCtrl.text.trim()),
-                    sellingPrice:
-                        drift.Value(double.parse(priceCtrl.text.trim())),
+                    sellingPrice: drift.Value(
+                      double.parse(priceCtrl.text.trim()),
+                    ),
                     reorderLevel: drift.Value(
-                        double.tryParse(reorderCtrl.text.trim()) ?? 0.0),
+                      double.tryParse(reorderCtrl.text.trim()) ?? 0.0,
+                    ),
                     prescriptionStatus: drift.Value(selectedStatus),
                     isActive: const drift.Value(true),
                     createdAt: drift.Value(DateTime.now()),
@@ -209,7 +233,7 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
 
                 if (ctx.mounted) Navigator.pop(ctx);
               },
-              child: const Text('Simpan'),
+              child: Text(loc.t('save')),
             ),
           ],
         ),
@@ -218,6 +242,7 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
   }
 
   void _showAddCategoryDialog() {
+    final loc = AppLocalizations.of(context);
     final formKey = GlobalKey<FormState>();
     final nameCtrl = TextEditingController();
     final descCtrl = TextEditingController();
@@ -225,7 +250,7 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Tambah Kategori Obat'),
+        title: Text(loc.t('addCategory')),
         content: Form(
           key: formKey,
           child: Column(
@@ -233,9 +258,9 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
             children: [
               TextFormField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Nama Kategori *'),
+                decoration: const InputDecoration(labelText: 'Category Name *'),
                 validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Nama kategori wajib diisi'
+                    ? 'Category name is required'
                     : null,
               ),
               const SizedBox(height: 12),
@@ -249,7 +274,7 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
+            child: Text(loc.t('cancel')),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -263,9 +288,9 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                   id: drift.Value(UuidGenerator.v4()),
                   pharmacyId: drift.Value(pharmacyId),
                   name: drift.Value(nameCtrl.text.trim()),
-                  description: drift.Value(descCtrl.text.trim().isEmpty
-                      ? null
-                      : descCtrl.text.trim()),
+                  description: drift.Value(
+                    descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
+                  ),
                   isActive: const drift.Value(true),
                   createdAt: drift.Value(DateTime.now()),
                   updatedAt: drift.Value(DateTime.now()),
@@ -274,7 +299,7 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
 
               if (ctx.mounted) Navigator.pop(ctx);
             },
-            child: const Text('Simpan'),
+            child: Text(loc.t('save')),
           ),
         ],
       ),
@@ -318,7 +343,10 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                         const SizedBox(height: 4),
                         Text(
                           loc.t('medicineCatalogSubtitle'),
-                          style: const TextStyle(color: Colors.grey, fontSize: 13),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -379,47 +407,68 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
 
                     final medicines = snapshot.data!;
                     if (medicines.isEmpty) {
-                      return const Center(
-                        child: Text('Belum ada data obat.'),
-                      );
+                      return Center(child: Text(loc.t('noMedicinesFound')));
                     }
 
                     return ListView.separated(
                       itemCount: medicines.length + 1,
-                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1),
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return Container(
                             color: Colors.grey.shade100,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            child: const Row(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            child: Row(
                               children: [
                                 Expanded(
-                                    flex: 3,
-                                    child: Text('Nama Obat',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 3,
+                                  child: Text(
+                                    loc.t('medicineName'),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Kategori',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    loc.t('category'),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Bentuk & Satuan',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    loc.t('formAndUnit'),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Harga Jual',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    loc.t('sellingPrice'),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Golongan',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    loc.t('regulation'),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           );
@@ -428,7 +477,9 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                         final item = medicines[index - 1];
                         return Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           child: Row(
                             children: [
                               Expanded(
@@ -439,7 +490,8 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                                     Text(
                                       item.medicine.name,
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                     if (item.medicine.genericName != null)
                                       Text(
@@ -466,9 +518,11 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                                 flex: 2,
                                 child: Text(
                                   AppFormatters.currency(
-                                      item.medicine.sellingPrice),
+                                    item.medicine.sellingPrice,
+                                  ),
                                   style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               Expanded(
@@ -476,7 +530,12 @@ class _MedicinesPageState extends ConsumerState<MedicinesPage> {
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: StatusBadge.info(
-                                    item.medicine.prescriptionStatus.label,
+                                    loc.t(
+                                      item
+                                          .medicine
+                                          .prescriptionStatus
+                                          .localizationKey,
+                                    ),
                                   ),
                                 ),
                               ),

@@ -13,9 +13,9 @@ class Users extends Table {
   TextColumn get email => text().nullable()();
   TextColumn get passwordHash => text()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
-  DateTimeColumn get lastLoginAt => dateTime().nullable()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get lastLoginAt => integer().nullable()();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

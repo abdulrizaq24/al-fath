@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/localization/app_localizations.dart';
 import '../../providers/locale_provider.dart';
 
 class LanguageToggle extends ConsumerWidget {
@@ -13,48 +14,57 @@ class LanguageToggle extends ConsumerWidget {
     final currentLocale = ref.watch(localeProvider);
     final isEn = currentLocale.languageCode == 'en';
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context);
 
     if (compact) {
-      return TextButton.icon(
-        icon: const Icon(Icons.language, size: 18),
-        label: Text(
-          isEn ? 'English' : 'العربية',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+      return Tooltip(
+        message: loc.t('language'),
+        child: TextButton.icon(
+          icon: const Icon(Icons.language, size: 18),
+          label: Text(
+            isEn ? loc.t('english') : loc.t('arabic'),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+          onPressed: () {
+            ref.read(localeProvider.notifier).toggleLocale();
+          },
         ),
-        onPressed: () {
-          ref.read(localeProvider.notifier).toggleLocale();
-        },
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      padding: const EdgeInsets.all(2),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _LanguageOption(
-            label: 'EN',
-            flag: '🇬🇧',
-            isSelected: isEn,
-            onTap: () =>
-                ref.read(localeProvider.notifier).setLocale(const Locale('en')),
-            theme: theme,
-          ),
-          const SizedBox(width: 2),
-          _LanguageOption(
-            label: 'العربية',
-            flag: '🇸🇦',
-            isSelected: !isEn,
-            onTap: () =>
-                ref.read(localeProvider.notifier).setLocale(const Locale('ar')),
-            theme: theme,
-          ),
-        ],
+    return Tooltip(
+      message: loc.t('language'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        padding: const EdgeInsets.all(2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _LanguageOption(
+              label: loc.t('english'),
+              flag: '🇬🇧',
+              isSelected: isEn,
+              onTap: () => ref
+                  .read(localeProvider.notifier)
+                  .setLocale(const Locale('en')),
+              theme: theme,
+            ),
+            const SizedBox(width: 2),
+            _LanguageOption(
+              label: loc.t('arabic'),
+              flag: '🇸🇦',
+              isSelected: !isEn,
+              onTap: () => ref
+                  .read(localeProvider.notifier)
+                  .setLocale(const Locale('ar')),
+              theme: theme,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -81,7 +91,7 @@ class _LanguageOption extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(7),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected ? theme.colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(7),

@@ -7,10 +7,7 @@ class SaleItemBatchWithBatch {
   final SaleItemBatche itemBatch;
   final Batche batch;
 
-  const SaleItemBatchWithBatch({
-    required this.itemBatch,
-    required this.batch,
-  });
+  const SaleItemBatchWithBatch({required this.itemBatch, required this.batch});
 }
 
 class SaleItemWithMedicineAndBatches {
@@ -57,8 +54,7 @@ abstract class ISaleDao {
   Future<SaleWithDetails?> getById(String id);
   Future<Sale> insertSale(SalesCompanion entry);
   Future<SaleItem> insertSaleItem(SaleItemsCompanion entry);
-  Future<void> insertSaleItemBatches(
-      List<SaleItemBatchesCompanion> batches);
+  Future<void> insertSaleItemBatches(List<SaleItemBatchesCompanion> batches);
   Future<Payment> insertPayment(PaymentsCompanion entry);
   Future<bool> updateStatus(String id, SaleStatus status);
 }
@@ -133,21 +129,21 @@ class SaleDao implements ISaleDao {
 
   @override
   Future<SaleWithDetails?> getById(String id) async {
-    final sale = await (_db.select(_db.sales)
-          ..where((tbl) => tbl.id.equals(id)))
-        .getSingleOrNull();
+    final sale = await (_db.select(
+      _db.sales,
+    )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
     if (sale == null) return null;
 
     Patient? patient;
     if (sale.patientId != null) {
-      patient = await (_db.select(_db.patients)
-            ..where((tbl) => tbl.id.equals(sale.patientId!)))
-          .getSingleOrNull();
+      patient = await (_db.select(
+        _db.patients,
+      )..where((tbl) => tbl.id.equals(sale.patientId!))).getSingleOrNull();
     }
 
-    final user = await (_db.select(_db.users)
-          ..where((tbl) => tbl.id.equals(sale.soldById)))
-        .getSingle();
+    final user = await (_db.select(
+      _db.users,
+    )..where((tbl) => tbl.id.equals(sale.soldById))).getSingle();
 
     final itemsQuery = _db.select(_db.saleItems).join([
       innerJoin(
@@ -178,16 +174,18 @@ class SaleDao implements ISaleDao {
         );
       }).toList();
 
-      items.add(SaleItemWithMedicineAndBatches(
-        item: saleItem,
-        medicine: medicine,
-        allocatedBatches: allocatedBatches,
-      ));
+      items.add(
+        SaleItemWithMedicineAndBatches(
+          item: saleItem,
+          medicine: medicine,
+          allocatedBatches: allocatedBatches,
+        ),
+      );
     }
 
-    final payments = await (_db.select(_db.payments)
-          ..where((tbl) => tbl.saleId.equals(id)))
-        .get();
+    final payments = await (_db.select(
+      _db.payments,
+    )..where((tbl) => tbl.saleId.equals(id))).get();
 
     return SaleWithDetails(
       sale: sale,
@@ -210,7 +208,8 @@ class SaleDao implements ISaleDao {
 
   @override
   Future<void> insertSaleItemBatches(
-      List<SaleItemBatchesCompanion> batches) async {
+    List<SaleItemBatchesCompanion> batches,
+  ) async {
     await _db.batch((b) {
       b.insertAll(_db.saleItemBatches, batches);
     });
@@ -223,14 +222,13 @@ class SaleDao implements ISaleDao {
 
   @override
   Future<bool> updateStatus(String id, SaleStatus status) async {
-    final count = await (_db.update(_db.sales)
-          ..where((tbl) => tbl.id.equals(id)))
-        .write(
-      SalesCompanion(
-        status: Value(status),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final count =
+        await (_db.update(_db.sales)..where((tbl) => tbl.id.equals(id))).write(
+          SalesCompanion(
+            status: Value(status),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
     return count > 0;
   }
 }

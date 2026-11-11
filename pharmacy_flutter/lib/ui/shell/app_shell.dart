@@ -79,15 +79,18 @@ class AppShell extends ConsumerWidget {
               children: [
                 // Header Logo & Pharmacy name
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color:
-                              theme.colorScheme.primary.withValues(alpha: 0.12),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.12,
+                          ),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -128,9 +131,7 @@ class AppShell extends ConsumerWidget {
                 // Language Toggle Bar inside Sidebar
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Center(
-                    child: LanguageToggle(),
-                  ),
+                  child: Center(child: LanguageToggle(compact: true)),
                 ),
                 const SizedBox(height: 12),
                 const Divider(height: 1),
@@ -144,36 +145,39 @@ class AppShell extends ConsumerWidget {
                       final isSelected = currentRoute == item.route;
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: ListTile(
-                          dense: true,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          selected: isSelected,
-                          selectedTileColor:
-                              theme.colorScheme.primary.withValues(alpha: 0.08),
-                          selectedColor: theme.colorScheme.primary,
-                          leading: Icon(
-                            isSelected ? item.activeIcon : item.icon,
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : Colors.grey.shade700,
-                            size: 20,
-                          ),
-                          title: Text(
-                            item.label,
-                            style: TextStyle(
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                              fontSize: 13,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: ListTile(
+                            dense: true,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            selected: isSelected,
+                            selectedTileColor: theme.colorScheme.primary
+                                .withValues(alpha: 0.08),
+                            selectedColor: theme.colorScheme.primary,
+                            leading: Icon(
+                              isSelected ? item.activeIcon : item.icon,
+                              color: isSelected
+                                  ? theme.colorScheme.primary
+                                  : Colors.grey.shade700,
+                              size: 20,
+                            ),
+                            title: Text(
+                              item.label,
+                              style: TextStyle(
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                                fontSize: 13,
+                              ),
+                            ),
+                            onTap: () {
+                              if (!isSelected) {
+                                context.go(item.route);
+                              }
+                            },
                           ),
-                          onTap: () {
-                            if (!isSelected) {
-                              context.go(item.route);
-                            }
-                          },
                         ),
                       );
                     }).toList(),
@@ -188,8 +192,9 @@ class AppShell extends ConsumerWidget {
                     children: [
                       CircleAvatar(
                         radius: 18,
-                        backgroundColor:
-                            theme.colorScheme.primary.withValues(alpha: 0.15),
+                        backgroundColor: theme.colorScheme.primary.withValues(
+                          alpha: 0.15,
+                        ),
                         child: Text(
                           (authState.currentUser?.name.isNotEmpty == true)
                               ? authState.currentUser!.name[0].toUpperCase()
@@ -240,9 +245,7 @@ class AppShell extends ConsumerWidget {
           ),
 
           // Main Content View
-          Expanded(
-            child: child,
-          ),
+          Expanded(child: child),
         ],
       ),
     );

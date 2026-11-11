@@ -8,11 +8,11 @@ class PurchaseItems extends Table {
   TextColumn get id => text()();
   TextColumn get purchaseId => text().references(Purchases, #id)();
   TextColumn get medicineId => text().references(Medicines, #id)();
-  RealColumn get orderedQuantity => real()();
-  RealColumn get unitCost => real()();
-  RealColumn get totalCost => real()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get orderedQuantity => integer()();
+  IntColumn get unitCost => integer()();
+  IntColumn get totalCost => integer()();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

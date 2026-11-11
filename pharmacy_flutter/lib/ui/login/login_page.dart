@@ -30,17 +30,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authStateProvider.notifier).login(
-            _usernameController.text,
-            _passwordController.text,
-          );
+      await ref
+          .read(authStateProvider.notifier)
+          .login(_usernameController.text, _passwordController.text);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -82,9 +78,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: const [
-                      LanguageToggle(),
-                    ],
+                    children: const [LanguageToggle()],
                   ),
                   const SizedBox(height: 8),
                   Center(
@@ -124,8 +118,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       labelText: loc.t('username'),
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? loc.t('required') : null,
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? loc.t('required')
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -135,8 +130,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       labelText: loc.t('password'),
                       prefixIcon: const Icon(Icons.lock_outline),
                     ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? loc.t('required') : null,
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? loc.t('required')
+                        : null,
                     onFieldSubmitted: (_) => _login(),
                   ),
                   const SizedBox(height: 24),

@@ -45,10 +45,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/setup',
         builder: (context, state) => const SetupWizardPage(),
       ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
@@ -56,10 +53,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/',
             builder: (context, state) => const DashboardPage(),
           ),
-          GoRoute(
-            path: '/pos',
-            builder: (context, state) => const SalesPage(),
-          ),
+          GoRoute(path: '/pos', builder: (context, state) => const SalesPage()),
           GoRoute(
             path: '/medicines',
             builder: (context, state) => const MedicinesPage(),

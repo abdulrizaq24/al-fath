@@ -11,13 +11,12 @@ class PrescriptionItems extends Table {
   TextColumn get id => text()();
   TextColumn get prescriptionId => text().references(Prescriptions, #id)();
   TextColumn get medicineId => text().references(Medicines, #id)();
-  RealColumn get quantityPrescribed => real()();
-  RealColumn get quantityDispensed =>
-      real().withDefault(const Constant(0.0))();
+  IntColumn get quantityPrescribed => integer()();
+  IntColumn get quantityDispensed => integer().withDefault(const Constant(0))();
   TextColumn get directions => text().nullable()();
   TextColumn get notes => text().nullable()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

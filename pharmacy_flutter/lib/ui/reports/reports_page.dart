@@ -46,14 +46,16 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
       final dir = await getApplicationDocumentsDirectory();
       final filePath =
-          '${dir.path}/Laporan_Penjualan_${DateTime.now().millisecondsSinceEpoch}.xlsx';
+          '${dir.path}/Sales_Report_${DateTime.now().millisecondsSinceEpoch}.xlsx';
       final file = File(filePath);
       await file.writeAsBytes(bytes);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Laporan Excel berhasil disimpan di: $filePath'),
+            content: Text(
+              '${AppLocalizations.of(context).t('exportSuccess')} $filePath',
+            ),
             backgroundColor: const Color(0xFF006D42),
           ),
         );
@@ -62,7 +64,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal mengekspor Excel: $e'),
+            content: Text('Failed to export Excel: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -95,8 +97,10 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                   children: [
                     Text(
                       loc.t('reports'),
-                      style:
-                          const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -111,13 +115,22 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     DropdownButton<int>(
                       value: _selectedFilterDays,
                       items: [
-                        DropdownMenuItem(value: 0, child: Text(loc.t('filterToday'))),
                         DropdownMenuItem(
-                            value: 7, child: Text(loc.t('filter7Days'))),
+                          value: 0,
+                          child: Text(loc.t('filterToday')),
+                        ),
                         DropdownMenuItem(
-                            value: 30, child: Text(loc.t('filter30Days'))),
+                          value: 7,
+                          child: Text(loc.t('filter7Days')),
+                        ),
                         DropdownMenuItem(
-                            value: -1, child: Text(loc.t('filterAllTime'))),
+                          value: 30,
+                          child: Text(loc.t('filter30Days')),
+                        ),
+                        DropdownMenuItem(
+                          value: -1,
+                          child: Text(loc.t('filterAllTime')),
+                        ),
                       ],
                       onChanged: (v) {
                         if (v != null) setState(() => _selectedFilterDays = v);
@@ -132,10 +145,14 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             // Financial Metrics Cards
             FutureBuilder(
               future: Future.wait([
-                reportDao.getFinancialSummary(pharmacyId,
-                    startDate: _startDate),
-                reportDao.getTopSellingMedicines(pharmacyId,
-                    startDate: _startDate),
+                reportDao.getFinancialSummary(
+                  pharmacyId,
+                  startDate: _startDate,
+                ),
+                reportDao.getTopSellingMedicines(
+                  pharmacyId,
+                  startDate: _startDate,
+                ),
                 saleDao.getAll(pharmacyId, startDate: _startDate),
               ]),
               builder: (context, AsyncSnapshot<List<dynamic>> snap) {
@@ -216,14 +233,17 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                             Text(
                               loc.t('topSellingMedicines'),
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             if (topSelling.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.all(20),
+                              Padding(
+                                padding: const EdgeInsets.all(20),
                                 child: Center(
-                                    child: Text('Belum ada transaksi.')),
+                                  child: Text(loc.t('noTransactions')),
+                                ),
                               )
                             else
                               ListView.separated(
@@ -238,11 +258,15 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                                     leading: CircleAvatar(
                                       child: Text('${i + 1}'),
                                     ),
-                                    title: Text(item.medicineName,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold)),
+                                    title: Text(
+                                      item.medicineName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                     subtitle: Text(
-                                        'Terjual: ${AppFormatters.quantity(item.totalQuantity)} unit'),
+                                      '${loc.t('sold')}: ${AppFormatters.quantity(item.totalQuantity)} ${loc.t('unitsSold')}',
+                                    ),
                                     trailing: Text(
                                       AppFormatters.currency(item.totalRevenue),
                                       style: TextStyle(
@@ -287,8 +311,10 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+            Text(
+              label,
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            ),
             const SizedBox(height: 8),
             Text(
               value,

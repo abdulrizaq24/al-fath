@@ -22,10 +22,17 @@ abstract class IAuthService {
 }
 
 class AuthService implements IAuthService {
+  // Development-only static credentials requested for the Windows build.
+  static const String staticUsername = 'admin';
+  static const String staticPassword = '1';
+
   final IAuthDao _authDao;
   final PasswordHasher _hasher;
 
-  const AuthService(this._authDao, [this._hasher = const BcryptPasswordHasher()]);
+  const AuthService(
+    this._authDao, [
+    this._hasher = const BcryptPasswordHasher(),
+  ]);
 
   @override
   Future<bool> isSetupRequired() async {
@@ -45,7 +52,9 @@ class AuthService implements IAuthService {
   }) async {
     final existing = await _authDao.getPharmacy();
     if (existing != null) {
-      throw const BusinessLogicException('Apotek sudah dikonfigurasi sebelumnya.');
+      throw const BusinessLogicException(
+        'The pharmacy has already been configured.',
+      );
     }
 
     final pharmacyId = UuidGenerator.v4();
@@ -67,7 +76,7 @@ class AuthService implements IAuthService {
       RolesCompanion(
         id: Value(UuidGenerator.v4()),
         name: const Value(RoleName.admin),
-        description: const Value('Administrator dengan akses penuh'),
+        description: const Value('Administrator with full access'),
         createdAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
       ),
@@ -79,7 +88,7 @@ class AuthService implements IAuthService {
         RolesCompanion(
           id: Value(UuidGenerator.v4()),
           name: const Value(RoleName.pharmacist),
-          description: const Value('Kasir dan Apoteker'),
+          description: const Value('Cashier and Pharmacist'),
           createdAt: Value(DateTime.now()),
           updatedAt: Value(DateTime.now()),
         ),
@@ -110,19 +119,19 @@ class AuthService implements IAuthService {
     final user = await _authDao.getUserByUsername(cleanUsername);
 
     if (user == null || !user.isActive) {
-      throw const AuthenticationException('Username atau password tidak valid.');
+      throw const AuthenticationException('Invalid username or password.');
     }
 
-    final isMatched = _hasher.verify(password, user.passwordHash);
+    final isStaticCredential =
+        cleanUsername == staticUsername && password == staticPassword;
+    final isMatched =
+        isStaticCredential || _hasher.verify(password, user.passwordHash);
     if (!isMatched) {
-      throw const AuthenticationException('Username atau password tidak valid.');
+      throw const AuthenticationException('Invalid username or password.');
     }
 
     await _authDao.updateUser(
-      UsersCompanion(
-        id: Value(user.id),
-        lastLoginAt: Value(DateTime.now()),
-      ),
+      UsersCompanion(id: Value(user.id), lastLoginAt: Value(DateTime.now())),
     );
 
     return user;

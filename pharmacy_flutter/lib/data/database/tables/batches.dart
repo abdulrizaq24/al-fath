@@ -10,13 +10,13 @@ class Batches extends Table {
   TextColumn get pharmacyId => text().references(Pharmacies, #id)();
   TextColumn get medicineId => text().references(Medicines, #id)();
   TextColumn get batchNumber => text()();
-  DateTimeColumn get expiryDate => dateTime()();
-  RealColumn get purchasePrice => real()();
-  RealColumn get receivedQuantity => real()();
-  RealColumn get currentQuantity => real()();
-  DateTimeColumn get receivedAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get expiryDate => text()();
+  IntColumn get purchasePrice => integer()();
+  IntColumn get receivedQuantity => integer()();
+  IntColumn get currentQuantity => integer()();
+  IntColumn get receivedAt => integer().withDefault(const Constant(0))();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

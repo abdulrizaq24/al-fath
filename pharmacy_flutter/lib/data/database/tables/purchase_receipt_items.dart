@@ -17,9 +17,9 @@ class PurchaseReceiptItems extends Table {
   TextColumn get receiptId => text().references(PurchaseReceipts, #id)();
   TextColumn get purchaseItemId => text().references(PurchaseItems, #id)();
   TextColumn get batchId => text().references(Batches, #id)();
-  RealColumn get quantityReceived => real()();
-  RealColumn get unitCost => real()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get quantityReceived => integer()();
+  IntColumn get unitCost => integer()();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -91,13 +91,15 @@ class PurchaseService implements IPurchaseService {
     String? notes,
   }) async {
     if (items.isEmpty) {
-      throw const ValidationException('Daftar pesanan barang tidak boleh kosong.');
+      throw const ValidationException('The purchase order cannot be empty.');
     }
 
     double totalAmount = 0.0;
     for (final item in items) {
       if (item.orderedQuantity <= 0) {
-        throw const ValidationException('Kuantitas pesanan harus lebih besar dari 0.');
+        throw const ValidationException(
+          'Ordered quantity must be greater than 0.',
+        );
       }
       totalAmount += item.totalCost;
     }
@@ -153,30 +155,33 @@ class PurchaseService implements IPurchaseService {
     String? notes,
   }) async {
     if (items.isEmpty) {
-      throw const ValidationException('Daftar barang yang diterima tidak boleh kosong.');
+      throw const ValidationException(
+        'The received goods list cannot be empty.',
+      );
     }
 
     final purchase = await _purchaseDao.getById(purchaseId);
     if (purchase == null) {
-      throw const NotFoundException('Purchase Order tidak ditemukan.');
+      throw const NotFoundException('Purchase order not found.');
     }
 
     if (purchase.purchase.status == PurchaseStatus.received ||
         purchase.purchase.status == PurchaseStatus.cancelled) {
       throw BusinessLogicException(
-        'PO dengan status ${purchase.purchase.status.name} tidak dapat menerima barang.',
+        'Purchase order with status ${purchase.purchase.status.name} cannot receive goods.',
       );
     }
 
-    final existingReceipts =
-        await _purchaseDao.getReceiptItemsForPurchase(purchaseId);
+    final existingReceipts = await _purchaseDao.getReceiptItemsForPurchase(
+      purchaseId,
+    );
 
     // Hitung total yang sudah diterima per item sebelumnya
     final receivedTotals = <String, double>{};
     for (final rItem in existingReceipts) {
       receivedTotals[rItem.purchaseItemId] =
           (receivedTotals[rItem.purchaseItemId] ?? 0.0) +
-              rItem.quantityReceived;
+          rItem.quantityReceived;
     }
 
     await _db.transaction(() async {
@@ -200,25 +205,28 @@ class PurchaseService implements IPurchaseService {
         if (recItem.quantityReceived <= 0) continue;
 
         // Validasi tidak melebihi pesanan
-        final poItem = purchase.items
-            .firstWhere((it) => it.item.id == recItem.purchaseItemId);
+        final poItem = purchase.items.firstWhere(
+          (it) => it.item.id == recItem.purchaseItemId,
+        );
         final alreadyReceived = receivedTotals[recItem.purchaseItemId] ?? 0.0;
         final totalAfterThis = alreadyReceived + recItem.quantityReceived;
 
         if (totalAfterThis > poItem.item.orderedQuantity) {
           throw ValidationException(
-            'Kuantitas penerimaan melebihi sisa pesanan untuk obat ${poItem.medicine.name}.',
+            'Received quantity exceeds the remaining order quantity for ${poItem.medicine.name}.',
           );
         }
         receivedTotals[recItem.purchaseItemId] = totalAfterThis;
 
         // Cari atau buat Batch
-        final existingBatch = await (_db.select(_db.batches)
-              ..where((tbl) =>
-                  tbl.pharmacyId.equals(pharmacyId) &
-                  tbl.medicineId.equals(recItem.medicineId) &
-                  tbl.batchNumber.equals(recItem.batchNumber.trim())))
-            .getSingleOrNull();
+        final existingBatch =
+            await (_db.select(_db.batches)..where(
+                  (tbl) =>
+                      tbl.pharmacyId.equals(pharmacyId) &
+                      tbl.medicineId.equals(recItem.medicineId) &
+                      tbl.batchNumber.equals(recItem.batchNumber.trim()),
+                ))
+                .getSingleOrNull();
 
         String batchId;
         if (existingBatch != null) {
@@ -227,8 +235,9 @@ class PurchaseService implements IPurchaseService {
               existingBatch.currentQuantity + recItem.quantityReceived;
           final newRecQty =
               existingBatch.receivedQuantity + recItem.quantityReceived;
-          await (_db.update(_db.batches)..where((tbl) => tbl.id.equals(batchId)))
-              .write(
+          await (_db.update(
+            _db.batches,
+          )..where((tbl) => tbl.id.equals(batchId))).write(
             BatchesCompanion(
               currentQuantity: Value(newQty),
               receivedQuantity: Value(newRecQty),

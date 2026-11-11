@@ -42,11 +42,13 @@ class BatchDao implements IBatchDao {
     String medicineId,
   ) async {
     final query = _db.select(_db.batches)
-      ..where((tbl) =>
-          tbl.pharmacyId.equals(pharmacyId) &
-          tbl.medicineId.equals(medicineId) &
-          tbl.currentQuantity.isBiggerThanValue(0) &
-          tbl.expiryDate.isBiggerOrEqualValue(_startOfToday))
+      ..where(
+        (tbl) =>
+            tbl.pharmacyId.equals(pharmacyId) &
+            tbl.medicineId.equals(medicineId) &
+            tbl.currentQuantity.isBiggerThanValue(0) &
+            tbl.expiryDate.isBiggerOrEqualValue(_startOfToday),
+      )
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.expiryDate)]);
     return query.get();
   }
@@ -57,9 +59,11 @@ class BatchDao implements IBatchDao {
     String medicineId,
   ) async {
     final query = _db.select(_db.batches)
-      ..where((tbl) =>
-          tbl.pharmacyId.equals(pharmacyId) &
-          tbl.medicineId.equals(medicineId))
+      ..where(
+        (tbl) =>
+            tbl.pharmacyId.equals(pharmacyId) &
+            tbl.medicineId.equals(medicineId),
+      )
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.expiryDate)]);
     return query.get();
   }
@@ -70,9 +74,11 @@ class BatchDao implements IBatchDao {
     String medicineId,
   ) {
     final query = _db.select(_db.batches)
-      ..where((tbl) =>
-          tbl.pharmacyId.equals(pharmacyId) &
-          tbl.medicineId.equals(medicineId))
+      ..where(
+        (tbl) =>
+            tbl.pharmacyId.equals(pharmacyId) &
+            tbl.medicineId.equals(medicineId),
+      )
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.expiryDate)]);
     return query.watch();
   }
@@ -85,11 +91,13 @@ class BatchDao implements IBatchDao {
     final today = _startOfToday;
     final maxDate = today.add(Duration(days: daysThreshold));
     final query = _db.select(_db.batches)
-      ..where((tbl) =>
-          tbl.pharmacyId.equals(pharmacyId) &
-          tbl.currentQuantity.isBiggerThanValue(0) &
-          tbl.expiryDate.isBiggerOrEqualValue(today) &
-          tbl.expiryDate.isSmallerOrEqualValue(maxDate))
+      ..where(
+        (tbl) =>
+            tbl.pharmacyId.equals(pharmacyId) &
+            tbl.currentQuantity.isBiggerThanValue(0) &
+            tbl.expiryDate.isBiggerOrEqualValue(today) &
+            tbl.expiryDate.isSmallerOrEqualValue(maxDate),
+      )
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.expiryDate)]);
     return query.get();
   }
@@ -98,10 +106,12 @@ class BatchDao implements IBatchDao {
   Future<List<Batche>> getExpiredBatches(String pharmacyId) async {
     final today = _startOfToday;
     final query = _db.select(_db.batches)
-      ..where((tbl) =>
-          tbl.pharmacyId.equals(pharmacyId) &
-          tbl.currentQuantity.isBiggerThanValue(0) &
-          tbl.expiryDate.isSmallerThanValue(today))
+      ..where(
+        (tbl) =>
+            tbl.pharmacyId.equals(pharmacyId) &
+            tbl.currentQuantity.isBiggerThanValue(0) &
+            tbl.expiryDate.isSmallerThanValue(today),
+      )
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.expiryDate)]);
     return query.get();
   }
@@ -111,8 +121,10 @@ class BatchDao implements IBatchDao {
     String pharmacyId,
     String medicineId,
   ) async {
-    final availableBatches =
-        await getAvailableBatchesFEFO(pharmacyId, medicineId);
+    final availableBatches = await getAvailableBatchesFEFO(
+      pharmacyId,
+      medicineId,
+    );
     return availableBatches.fold<double>(
       0.0,
       (sum, b) => sum + b.currentQuantity,
@@ -132,14 +144,15 @@ class BatchDao implements IBatchDao {
 
   @override
   Future<bool> updateQuantity(String id, double newQuantity) async {
-    final count = await (_db.update(_db.batches)
-          ..where((tbl) => tbl.id.equals(id)))
-        .write(
-      BatchesCompanion(
-        currentQuantity: Value(newQuantity),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final count =
+        await (_db.update(
+          _db.batches,
+        )..where((tbl) => tbl.id.equals(id))).write(
+          BatchesCompanion(
+            currentQuantity: Value(newQuantity),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
     return count > 0;
   }
 }

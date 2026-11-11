@@ -66,10 +66,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
@@ -89,10 +86,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isSetupRequired: false,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
       rethrow;
     }
   }
@@ -130,23 +124,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
         currentPharmacy: pharmacy,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
       rethrow;
     }
   }
 
   void logout() {
-    state = state.copyWith(
-      clearUser: true,
-      clearError: true,
-    );
+    state = state.copyWith(clearUser: true, clearError: true);
   }
 }
 
-final authStateProvider =
-    StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(ref);
 });

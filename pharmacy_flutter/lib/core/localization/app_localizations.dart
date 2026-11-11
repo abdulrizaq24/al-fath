@@ -73,12 +73,15 @@ class AppLocalizations {
       'close': 'Close',
       'outOfStock': 'Medicine is out of stock or expired!',
       'exceedsStock': 'Quantity exceeds available stock.',
+      'paymentInsufficient': 'Paid amount is less than total bill!',
+      'medicineExpired': 'Medicine is out of stock or expired!',
       'insufficientPayment': 'Paid amount is less than total bill!',
       'stockAvailable': 'Stock:',
       'emptyStock': 'Out of Stock',
 
       // Medicines
-      'medicineCatalogSubtitle': 'Manage pharmaceutical catalog, selling prices, and categories',
+      'medicineCatalogSubtitle':
+          'Manage pharmaceutical catalog, selling prices, and categories',
       'newMedicine': 'Add Medicine',
       'newCategory': 'Category',
       'medicineName': 'Medicine Name',
@@ -87,7 +90,10 @@ class AppLocalizations {
       'category': 'Category',
       'dosageForm': 'Dosage Form',
       'baseUnit': 'Base Unit',
+      'formAndUnit': 'Form & Unit',
       'sellingPrice': 'Selling Price',
+      'reorderLevel': 'Reorder Level',
+      'requiredField': 'This field is required',
       'minStockLevel': 'Reorder Level',
       'regulation': 'Regulation / Class',
       'otc': 'OTC (Over-The-Counter)',
@@ -124,7 +130,8 @@ class AppLocalizations {
       'saveAndAddStock': 'Save & Add to Stock',
 
       // Prescriptions
-      'prescriptionsSubtitle': 'Patient prescription dispensing via automated FEFO',
+      'prescriptionsSubtitle':
+          'Patient prescription dispensing via automated FEFO',
       'newPatient': 'New Patient',
       'newRx': 'New Prescription',
       'patient': 'Patient',
@@ -139,7 +146,8 @@ class AppLocalizations {
       'patientFullName': 'Patient Full Name',
 
       // Inventory
-      'inventorySubtitle': 'Batch monitoring, stock opname adjustments, and audit trail',
+      'inventorySubtitle':
+          'Batch monitoring, stock opname adjustments, and audit trail',
       'tabBatches': 'Batches & Stock List',
       'tabExpiring': 'Expiring Batches (<60 days)',
       'tabAudit': 'Stock Mutation Audit Trail',
@@ -152,7 +160,8 @@ class AppLocalizations {
       'noMutations': 'No stock mutations recorded yet.',
 
       // Reports
-      'reportsSubtitle': 'Gross revenue, actual COGS, gross profit margins, and sales analytics',
+      'reportsSubtitle':
+          'Gross revenue, actual COGS, gross profit margins, and sales analytics',
       'filterToday': 'Today',
       'filter7Days': 'Last 7 Days',
       'filter30Days': 'Last 30 Days',
@@ -167,7 +176,8 @@ class AppLocalizations {
 
       // Setup & Auth
       'setupTitle': 'Initial System Setup',
-      'setupSubtitle': 'Configure your pharmacy details and create initial administrator',
+      'setupSubtitle':
+          'Configure your pharmacy details and create initial administrator',
       'pharmacyInfo': 'Pharmacy Information',
       'pharmacyName': 'Pharmacy Name',
       'licenseNumber': 'License / SIPA Number',
@@ -179,6 +189,68 @@ class AppLocalizations {
       'loginTitle': 'Sign In to Pharmacy System',
       'loginButton': 'Sign In',
       'required': 'Required',
+      'addPatientTitle': 'Add Patient',
+      'fullName': 'Full Name',
+      'phoneNumber': 'Phone Number',
+      'addPrescriptionTitle': 'Record Prescription',
+      'prescriptionMedicine': 'Prescribed Medicine',
+      'quantity': 'Quantity',
+      'validationRequired': 'Required',
+      'validationNumber': 'Enter a valid number',
+      'dispensing': 'Dispensing',
+      'exportSuccess': 'Excel report saved to:',
+      'exportFailed': 'Failed to export Excel:',
+      'noTransactions': 'No transactions yet.',
+      'sold': 'Sold',
+      'stockAdjustmentType': 'Adjustment Type',
+      'actualQuantity': 'Actual Physical Quantity',
+      'adjustmentReasonRequired': 'Adjustment reason *',
+      'purchaseStatusDraft': 'Draft',
+      'purchaseStatusOrdered': 'Ordered',
+      'purchaseStatusPartiallyReceived': 'Partially Received',
+      'purchaseStatusReceived': 'Received',
+      'purchaseStatusCancelled': 'Cancelled',
+      'prescriptionStatusPending': 'Pending',
+      'prescriptionStatusPartiallyDispensed': 'Partially Dispensed',
+      'prescriptionStatusDispensed': 'Dispensed',
+      'prescriptionStatusCancelled': 'Cancelled',
+      'inventoryPurchase': 'Purchase',
+      'inventorySale': 'Sale',
+      'inventoryCustomerReturn': 'Customer Return',
+      'inventorySupplierReturn': 'Supplier Return',
+      'inventoryDamage': 'Damage',
+      'inventoryExpiry': 'Expired',
+      'inventoryAdjustment': 'Stock Adjustment',
+      'addPatient': 'Add Patient',
+      'addMedicine': 'Add Medicine',
+      'addCategory': 'Add Medicine Category',
+      'addSupplier': 'Add Supplier / Distributor',
+      'noData': 'No data available.',
+      'noBatches': 'No batches received yet.',
+      'stockTotal': 'Total Stock',
+      'batch': 'Batch',
+      'expiry': 'Expiry',
+      'purchasePrice': 'Purchase Price',
+      'stock': 'Stock',
+      'physicalDamage': 'Physical Damage',
+      'expiredDamaged': 'Expired / Damaged',
+      'currentStock': 'Current Stock',
+      'batchNumber': 'Batch No.',
+      'validNumber': 'Enter a valid number',
+      'defaultDosage': 'Take 1 tablet 3 times daily after meals',
+      'saved': 'Saved',
+      'patientAddedFirst': 'Please add a patient first.',
+      'medicineAddedFirst': 'Please add a medicine first.',
+      'supplierAddedFirst': 'Please add a supplier first.',
+      'prescriptionComplete':
+          'This prescription has already been fully dispensed.',
+      'prescriptionSuccess': 'Prescription dispensed and stock deducted.',
+      'dispensePrescription': 'Dispense Prescription',
+      'patientLabel': 'Patient',
+      'doctorLabel': 'Doctor',
+      'totalCost': 'Total Cost',
+      'savePrescription': 'Save Prescription',
+      'purchaseOrder': 'Create Purchase Order (PO)',
     },
     'ar': {
       // General & Shell
@@ -215,7 +287,8 @@ class AppLocalizations {
       'voided': 'ملغي',
 
       // POS / Cashier
-      'searchMedicineHint': 'ابحث باسم الدواء، الاسم العلمي، أو امسح الباركود...',
+      'searchMedicineHint':
+          'ابحث باسم الدواء، الاسم العلمي، أو امسح الباركود...',
       'cart': 'سلة المشتريات',
       'clearCart': 'تفريغ',
       'cartEmpty': 'السلة فارغة',
@@ -241,17 +314,20 @@ class AppLocalizations {
       'emptyStock': 'نفذ من المخزون',
 
       // Medicines
-      'medicineCatalogSubtitle': 'إدارة دليل الأدوية، أسعار البيع، والتصنيفات الدوائية',
+      'medicineCatalogSubtitle':
+          'إدارة دليل الأدوية، أسعار البيع، والتصنيفات الدوائية',
       'newMedicine': 'إضافة دواء جديد',
       'newCategory': 'تصنيف جديد',
       'medicineName': 'اسم الدواء',
       'genericName': 'الاسم العلمي',
-      'barcode': 'الباركود / الكود',
+      'barcode': 'الباركود / الرمز',
       'category': 'التصنيف',
       'dosageForm': 'الشكل الصيدلاني',
       'baseUnit': 'الوحدة الأساسية',
+      'formAndUnit': 'الشكل والوحدة',
       'sellingPrice': 'سعر البيع',
-      'minStockLevel': 'حد إعادة الطلب',
+      'reorderLevel': 'حد إعادة الطلب',
+      'requiredField': 'هذا الحقل مطلوب',
       'regulation': 'التصنيف الرقابي',
       'otc': 'بدون وصفة (OTC)',
       'prescriptionRequired': 'بوصفة طبية فقط',
@@ -265,7 +341,8 @@ class AppLocalizations {
       'description': 'الوصف',
 
       // Purchases
-      'purchasesSubtitle': 'إدارة أوامر الشراء من الموردين واستلام شحنات الأدوية',
+      'purchasesSubtitle':
+          'إدارة أوامر الشراء من الموردين واستلام شحنات الأدوية',
       'newPO': 'أمر شراء جديد',
       'distributors': 'الموردين والمستودعات',
       'newDistributor': 'إضافة مورد جديد',
@@ -287,7 +364,8 @@ class AppLocalizations {
       'saveAndAddStock': 'حفظ وإضافة للمخزون',
 
       // Prescriptions
-      'prescriptionsSubtitle': 'صرف الوصفات الطبية للمرضى عبر نظام الصرف الآلي FEFO',
+      'prescriptionsSubtitle':
+          'صرف الوصفات الطبية للمرضى عبر نظام الصرف الآلي FEFO',
       'newPatient': 'مريض جديد',
       'newRx': 'تسجيل وصفة طبية',
       'patient': 'المريض',
@@ -315,7 +393,8 @@ class AppLocalizations {
       'noMutations': 'لا توجد حركات مخزنية مسجلة.',
 
       // Reports
-      'reportsSubtitle': 'المبيعات الإجمالية، تكلفة البضاعة المباعة COGS، وصافي الأرباح',
+      'reportsSubtitle':
+          'المبيعات الإجمالية، تكلفة البضاعة المباعة COGS، وصافي الأرباح',
       'filterToday': 'اليوم',
       'filter7Days': 'آخر 7 أيام',
       'filter30Days': 'آخر 30 يوماً',
@@ -342,6 +421,41 @@ class AppLocalizations {
       'loginTitle': 'تسجيل الدخول إلى نظام الصيدلية',
       'loginButton': 'تسجيل الدخول',
       'required': 'حقل مطلوب',
+      'addPatientTitle': 'إضافة مريض',
+      'fullName': 'الاسم الكامل',
+      'phoneNumber': 'رقم الهاتف',
+      'addPrescriptionTitle': 'تسجيل وصفة طبية',
+      'prescriptionMedicine': 'الدواء الموصوف',
+      'quantity': 'الكمية',
+      'validationRequired': 'حقل مطلوب',
+      'validationNumber': 'أدخل رقماً صحيحاً',
+      'dispensing': 'صرف الدواء',
+      'exportSuccess': 'تم حفظ تقرير إكسل في:',
+      'exportFailed': 'فشل تصدير إكسل:',
+      'noTransactions': 'لا توجد معاملات حتى الآن.',
+      'sold': 'المباع',
+      'stockAdjustmentType': 'نوع التسوية',
+      'actualQuantity': 'الكمية الفعلية',
+      'adjustmentReasonRequired': 'سبب التسوية *',
+      'purchaseStatusDraft': 'مسودة',
+      'purchaseStatusOrdered': 'تم الطلب',
+      'purchaseStatusPartiallyReceived': 'مستلم جزئياً',
+      'purchaseStatusReceived': 'تم الاستلام',
+      'purchaseStatusCancelled': 'ملغي',
+      'prescriptionStatusPending': 'قيد الانتظار',
+      'prescriptionStatusPartiallyDispensed': 'مصروف جزئياً',
+      'prescriptionStatusDispensed': 'تم الصرف',
+      'prescriptionStatusCancelled': 'ملغي',
+      'inventoryPurchase': 'شراء',
+      'inventorySale': 'بيع',
+      'inventoryCustomerReturn': 'مرتجع عميل',
+      'inventorySupplierReturn': 'مرتجع مورد',
+      'inventoryDamage': 'تالف',
+      'inventoryExpiry': 'منتهي الصلاحية',
+      'inventoryAdjustment': 'تسوية المخزون',
+      'defaultDosage': 'تناول قرص واحد 3 مرات يومياً بعد الطعام',
+      'expiredDamaged': 'منتهي الصلاحية / تالف',
+      'validNumber': 'أدخل رقماً صحيحاً',
     },
   };
 

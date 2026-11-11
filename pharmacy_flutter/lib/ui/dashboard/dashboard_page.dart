@@ -1,12 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/formatters.dart';
+import '../../data/daos/sale_dao.dart';
 import '../../domain/enums/app_enums.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
 import '../shared/status_badge.dart';
+
+Future<void> _showInvoice(
+  BuildContext context,
+  SaleWithDetails sale,
+  AppLocalizations loc,
+) async {
+  showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('${loc.t('invoiceNo')} ${sale.sale.invoiceNumber}'),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(AppFormatters.dateTime(sale.sale.saleDate)),
+            const Divider(),
+            ...sale.items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(item.medicine.name)),
+                    Text(AppFormatters.currency(item.item.total)),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(),
+            Text(
+              '${loc.t('total')}: ${AppFormatters.currency(sale.sale.total)}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(loc.t('close')),
+        ),
+      ],
+    ),
+  );
+}
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -70,7 +116,10 @@ class DashboardPage extends ConsumerWidget {
                   endDate: endOfToday,
                 ),
                 inventoryService.getLowStockMedicines(pharmacyId),
-                inventoryService.getExpiringBatches(pharmacyId, daysThreshold: 60),
+                inventoryService.getExpiringBatches(
+                  pharmacyId,
+                  daysThreshold: 60,
+                ),
               ]),
               builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -90,24 +139,28 @@ class DashboardPage extends ConsumerWidget {
                     value: AppFormatters.currency(todayRevenue),
                     icon: Icons.payments_outlined,
                     color: theme.colorScheme.primary,
+                    onTap: () => context.go('/reports'),
                   ),
                   _StatCard(
                     title: loc.t('totalTransactions'),
                     value: '$transactionCount',
                     icon: Icons.receipt_outlined,
                     color: const Color(0xFF1976D2),
+                    onTap: () => context.go('/reports'),
                   ),
                   _StatCard(
                     title: loc.t('lowStock'),
                     value: '${lowStock.length}',
                     icon: Icons.warning_amber_rounded,
                     color: const Color(0xFFE65100),
+                    onTap: () => context.go('/inventory'),
                   ),
                   _StatCard(
                     title: loc.t('expiringSoon'),
                     value: '${expiring.length}',
                     icon: Icons.hourglass_bottom_outlined,
                     color: const Color(0xFFC2185B),
+                    onTap: () => context.go('/inventory'),
                   ),
                 ];
 
@@ -126,13 +179,16 @@ class DashboardPage extends ConsumerWidget {
                     }
                     return Row(
                       children: cards
-                          .map((c) => Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6),
-                                  child: c,
+                          .map(
+                            (c) => Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
                                 ),
-                              ))
+                                child: c,
+                              ),
+                            ),
+                          )
                           .toList(),
                     );
                   },
@@ -172,9 +228,7 @@ class DashboardPage extends ConsumerWidget {
                         if (sales.isEmpty) {
                           return Padding(
                             padding: const EdgeInsets.all(32),
-                            child: Center(
-                              child: Text(loc.t('noSalesYet')),
-                            ),
+                            child: Center(child: Text(loc.t('noSalesYet'))),
                           );
                         }
 
@@ -197,38 +251,53 @@ class DashboardPage extends ConsumerWidget {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.all(10),
-                                  child: Text(loc.t('invoiceNo'),
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                  child: Text(
+                                    loc.t('invoiceNo'),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(10),
-                                  child: Text(loc.t('time'),
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                  child: Text(
+                                    loc.t('time'),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(10),
-                                  child: Text(loc.t('cashier'),
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                  child: Text(
+                                    loc.t('cashier'),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(10),
-                                  child: Text(loc.t('total'),
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                  child: Text(
+                                    loc.t('total'),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(10),
-                                  child: Text(loc.t('status'),
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
+                                  child: Text(
+                                    loc.t('status'),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -237,37 +306,52 @@ class DashboardPage extends ConsumerWidget {
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.all(10),
-                                    child: Text(s.sale.invoiceNumber,
+                                    child: InkWell(
+                                      onTap: () =>
+                                          _showInvoice(context, s, loc),
+                                      child: Text(
+                                        s.sale.invoiceNumber,
                                         style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12)),
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                          color: Color(0xFF006D42),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(10),
                                     child: Text(
-                                        AppFormatters.dateTime(s.sale.saleDate),
-                                        style: const TextStyle(fontSize: 12)),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: Text(s.soldBy.name,
-                                        style: const TextStyle(fontSize: 12)),
+                                      AppFormatters.dateTime(s.sale.saleDate),
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(10),
                                     child: Text(
-                                        AppFormatters.currency(s.sale.total),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12)),
+                                      s.soldBy.name,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                      AppFormatters.currency(s.sale.total),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8),
                                     child: Align(
                                       alignment: Alignment.centerLeft,
-                                      child: s.sale.status ==
-                                              SaleStatus.completed
-                                          ? StatusBadge.success(loc.t('completed'))
+                                      child:
+                                          s.sale.status == SaleStatus.completed
+                                          ? StatusBadge.success(
+                                              loc.t('completed'),
+                                            )
                                           : StatusBadge.error(loc.t('voided')),
                                     ),
                                   ),
@@ -294,53 +378,66 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final VoidCallback? onTap;
 
   const _StatCard({
     required this.title,
     required this.value,
     required this.icon,
     required this.color,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 28),
               ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              if (onTap != null)
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Colors.grey.shade400,
+                ),
+            ],
+          ),
         ),
       ),
     );

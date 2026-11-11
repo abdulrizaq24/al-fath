@@ -7,12 +7,12 @@ class Payments extends Table {
   TextColumn get id => text()();
   TextColumn get saleId => text().references(Sales, #id)();
   IntColumn get paymentMethod => intEnum<PaymentMethod>()();
-  RealColumn get amount => real()();
+  IntColumn get amount => integer()();
   IntColumn get status =>
       intEnum<PaymentStatus>().withDefault(const Constant(1))();
   TextColumn get transactionReference => text().nullable()();
-  DateTimeColumn get paidAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get paidAt => integer().withDefault(const Constant(0))();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

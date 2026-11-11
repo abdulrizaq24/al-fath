@@ -18,6 +18,7 @@ class PurchasesPage extends ConsumerWidget {
   const PurchasesPage({super.key});
 
   void _showCreateSupplierDialog(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
     final formKey = GlobalKey<FormState>();
     final nameCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
@@ -26,7 +27,7 @@ class PurchasesPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Tambah Distributor / Supplier'),
+        title: Text(loc.t('addSupplier')),
         content: Form(
           key: formKey,
           child: Column(
@@ -34,13 +35,18 @@ class PurchasesPage extends ConsumerWidget {
             children: [
               TextFormField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Nama PBF / Distributor *'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
+                decoration: const InputDecoration(
+                  labelText: 'Supplier / Distributor Name *',
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: phoneCtrl,
-                decoration: const InputDecoration(labelText: 'No. Telepon / WhatsApp'),
+                decoration: const InputDecoration(
+                  labelText: 'No. Telepon / WhatsApp',
+                ),
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -51,19 +57,31 @@ class PurchasesPage extends ConsumerWidget {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(loc.t('cancel')),
+          ),
           ElevatedButton(
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
-              final pharmacyId = ref.read(authStateProvider).currentPharmacy?.id ?? '';
+              final pharmacyId =
+                  ref.read(authStateProvider).currentPharmacy?.id ?? '';
               final supplierDao = ref.read(supplierDaoProvider);
               await supplierDao.insert(
                 SuppliersCompanion(
                   id: drift.Value(UuidGenerator.v4()),
                   pharmacyId: drift.Value(pharmacyId),
                   name: drift.Value(nameCtrl.text.trim()),
-                  phone: drift.Value(phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim()),
-                  address: drift.Value(addressCtrl.text.trim().isEmpty ? null : addressCtrl.text.trim()),
+                  phone: drift.Value(
+                    phoneCtrl.text.trim().isEmpty
+                        ? null
+                        : phoneCtrl.text.trim(),
+                  ),
+                  address: drift.Value(
+                    addressCtrl.text.trim().isEmpty
+                        ? null
+                        : addressCtrl.text.trim(),
+                  ),
                   isActive: const drift.Value(true),
                   createdAt: drift.Value(DateTime.now()),
                   updatedAt: drift.Value(DateTime.now()),
@@ -71,7 +89,7 @@ class PurchasesPage extends ConsumerWidget {
               );
               if (context.mounted) Navigator.pop(ctx);
             },
-            child: const Text('Simpan'),
+            child: Text(loc.t('save')),
           ),
         ],
       ),
@@ -83,6 +101,7 @@ class PurchasesPage extends ConsumerWidget {
     WidgetRef ref,
     PurchaseWithDetails purchase,
   ) {
+    final loc = AppLocalizations.of(context);
     final formKey = GlobalKey<FormState>();
     final receiptNumCtrl = TextEditingController();
     final List<_ReceiveRowData> receiveRows = purchase.items.map((it) {
@@ -90,7 +109,9 @@ class PurchasesPage extends ConsumerWidget {
         purchaseItem: it,
         batchCtrl: TextEditingController(),
         expiryDate: DateTime.now().add(const Duration(days: 365)),
-        qtyCtrl: TextEditingController(text: it.item.orderedQuantity.toString()),
+        qtyCtrl: TextEditingController(
+          text: it.item.orderedQuantity.toString(),
+        ),
         costCtrl: TextEditingController(text: it.item.unitCost.toString()),
       );
     }).toList();
@@ -99,7 +120,9 @@ class PurchasesPage extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          title: Text('Penerimaan Barang PO: ${purchase.purchase.purchaseNumber}'),
+          title: Text(
+            '${loc.t('receiveGoodsTitle')} ${purchase.purchase.purchaseNumber}',
+          ),
           content: SizedBox(
             width: 700,
             child: Form(
@@ -118,8 +141,10 @@ class PurchasesPage extends ConsumerWidget {
                           v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
                     ),
                     const SizedBox(height: 16),
-                    const Text('Daftar Barang Masuk & Nomor Batch:',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Daftar Barang Masuk & Nomor Batch:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 8),
                     ...receiveRows.map((row) {
                       return Card(
@@ -131,7 +156,9 @@ class PurchasesPage extends ConsumerWidget {
                             children: [
                               Text(
                                 '${row.purchaseItem.medicine.name} (Pesan: ${AppFormatters.quantity(row.purchaseItem.item.orderedQuantity)})',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               Row(
@@ -141,8 +168,10 @@ class PurchasesPage extends ConsumerWidget {
                                     child: TextFormField(
                                       controller: row.batchCtrl,
                                       decoration: const InputDecoration(
-                                          labelText: 'No. Batch *'),
-                                      validator: (v) => v == null || v.trim().isEmpty
+                                        labelText: 'No. Batch *',
+                                      ),
+                                      validator: (v) =>
+                                          v == null || v.trim().isEmpty
                                           ? 'Wajib'
                                           : null,
                                     ),
@@ -159,14 +188,18 @@ class PurchasesPage extends ConsumerWidget {
                                           lastDate: DateTime(2040),
                                         );
                                         if (picked != null) {
-                                          setDlgState(() => row.expiryDate = picked);
+                                          setDlgState(
+                                            () => row.expiryDate = picked,
+                                          );
                                         }
                                       },
                                       child: InputDecorator(
                                         decoration: const InputDecoration(
-                                            labelText: 'Exp Date *'),
+                                          labelText: 'Exp Date *',
+                                        ),
                                         child: Text(
-                                            AppFormatters.date(row.expiryDate)),
+                                          AppFormatters.date(row.expiryDate),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -177,11 +210,12 @@ class PurchasesPage extends ConsumerWidget {
                                       controller: row.qtyCtrl,
                                       keyboardType: TextInputType.number,
                                       decoration: const InputDecoration(
-                                          labelText: 'Qty *'),
+                                        labelText: 'Qty *',
+                                      ),
                                       validator: (v) =>
                                           double.tryParse(v ?? '') == null
-                                              ? 'Valid'
-                                              : null,
+                                          ? 'Valid'
+                                          : null,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -191,11 +225,12 @@ class PurchasesPage extends ConsumerWidget {
                                       controller: row.costCtrl,
                                       keyboardType: TextInputType.number,
                                       decoration: const InputDecoration(
-                                          labelText: 'Harga Beli (Rp) *'),
+                                        labelText: 'Purchase Price (SDG) *',
+                                      ),
                                       validator: (v) =>
                                           double.tryParse(v ?? '') == null
-                                              ? 'Valid'
-                                              : null,
+                                          ? 'Valid'
+                                          : null,
                                     ),
                                   ),
                                 ],
@@ -213,7 +248,7 @@ class PurchasesPage extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Batal'),
+              child: Text(loc.t('cancel')),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -246,12 +281,15 @@ class PurchasesPage extends ConsumerWidget {
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+                      SnackBar(
+                        content: Text(e.toString()),
+                        backgroundColor: Colors.red,
+                      ),
                     );
                   }
                 }
               },
-              child: const Text('Simpan & Tambah Stok'),
+              child: const Text('Save & Add to Stock'),
             ),
           ],
         ),
@@ -265,10 +303,11 @@ class PurchasesPage extends ConsumerWidget {
     List<Supplier> suppliers,
     List<MedicineWithCategory> medicines,
   ) {
+    final loc = AppLocalizations.of(context);
     if (suppliers.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tambahkan supplier terlebih dahulu.'),
+        SnackBar(
+          content: Text(loc.t('supplierAddedFirst')),
           backgroundColor: Colors.orange,
         ),
       );
@@ -276,8 +315,8 @@ class PurchasesPage extends ConsumerWidget {
     }
     if (medicines.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tambahkan obat terlebih dahulu.'),
+        SnackBar(
+          content: Text(loc.t('medicineAddedFirst')),
           backgroundColor: Colors.orange,
         ),
       );
@@ -304,7 +343,9 @@ class PurchasesPage extends ConsumerWidget {
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: selectedSupplierId,
-                    decoration: const InputDecoration(labelText: 'Supplier / PBF *'),
+                    decoration: const InputDecoration(
+                      labelText: 'Supplier / PBF *',
+                    ),
                     items: suppliers.map((s) {
                       return DropdownMenuItem(value: s.id, child: Text(s.name));
                     }).toList(),
@@ -315,11 +356,15 @@ class PurchasesPage extends ConsumerWidget {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: selectedMedicineId,
-                    decoration: const InputDecoration(labelText: 'Obat Dipesan *'),
+                    decoration: const InputDecoration(
+                      labelText: 'Ordered Medicine *',
+                    ),
                     items: medicines.map((m) {
                       return DropdownMenuItem(
                         value: m.medicine.id,
-                        child: Text('${m.medicine.name} (${m.medicine.dosageForm})'),
+                        child: Text(
+                          '${m.medicine.name} (${m.medicine.dosageForm})',
+                        ),
                       );
                     }).toList(),
                     onChanged: (v) {
@@ -333,9 +378,11 @@ class PurchasesPage extends ConsumerWidget {
                         child: TextFormField(
                           controller: qtyCtrl,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'Kuantitas *'),
+                          decoration: const InputDecoration(
+                            labelText: 'Quantity *',
+                          ),
                           validator: (v) => double.tryParse(v ?? '') == null
-                              ? 'Kuantitas valid wajib'
+                              ? loc.t('validNumber')
                               : null,
                         ),
                       ),
@@ -345,9 +392,10 @@ class PurchasesPage extends ConsumerWidget {
                           controller: costCtrl,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                              labelText: 'Estimasi Harga Beli (Rp) *'),
+                            labelText: 'Est. Purchase Price (SDG) *',
+                          ),
                           validator: (v) => double.tryParse(v ?? '') == null
-                              ? 'Harga valid wajib'
+                              ? 'A valid price is required'
                               : null,
                         ),
                       ),
@@ -360,7 +408,7 @@ class PurchasesPage extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Batal'),
+              child: Text(loc.t('cancel')),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -384,7 +432,7 @@ class PurchasesPage extends ConsumerWidget {
                 );
                 if (context.mounted) Navigator.pop(ctx);
               },
-              child: const Text('Simpan PO'),
+              child: const Text('Save PO'),
             ),
           ],
         ),
@@ -434,7 +482,10 @@ class PurchasesPage extends ConsumerWidget {
                             const SizedBox(height: 4),
                             Text(
                               loc.t('purchasesSubtitle'),
-                              style: const TextStyle(color: Colors.grey, fontSize: 13),
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -443,7 +494,8 @@ class PurchasesPage extends ConsumerWidget {
                             OutlinedButton.icon(
                               icon: const Icon(Icons.business_outlined),
                               label: Text(loc.t('distributors')),
-                              onPressed: () => _showCreateSupplierDialog(context, ref),
+                              onPressed: () =>
+                                  _showCreateSupplierDialog(context, ref),
                             ),
                             const SizedBox(width: 12),
                             ElevatedButton.icon(
@@ -485,66 +537,98 @@ class PurchasesPage extends ConsumerWidget {
 
                     return ListView.separated(
                       itemCount: purchases.length + 1,
-                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1),
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return Container(
                             color: Colors.grey.shade100,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             child: const Row(
                               children: [
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('No. PO',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'No. PO',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Supplier',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Supplier',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Tanggal',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Date',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Total Estimasi',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Estimated Total',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Status',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Status',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 2,
-                                    child: Text('Aksi',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
+                                  flex: 2,
+                                  child: Text(
+                                    'Aksi',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           );
                         }
 
                         final item = purchases[index - 1];
-                        final canReceive = item.purchase.status ==
-                                PurchaseStatus.ordered ||
+                        final canReceive =
+                            item.purchase.status == PurchaseStatus.ordered ||
                             item.purchase.status ==
                                 PurchaseStatus.partiallyReceived;
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           child: Row(
                             children: [
                               Expanded(
                                 flex: 2,
-                                child: Text(item.purchase.purchaseNumber,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold)),
+                                child: Text(
+                                  item.purchase.purchaseNumber,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                               Expanded(
                                 flex: 2,
@@ -552,32 +636,56 @@ class PurchasesPage extends ConsumerWidget {
                               ),
                               Expanded(
                                 flex: 2,
-                                child: Text(AppFormatters.date(
-                                    item.purchase.purchaseDate)),
+                                child: Text(
+                                  AppFormatters.date(
+                                    item.purchase.purchaseDate,
+                                  ),
+                                ),
                               ),
                               Expanded(
                                 flex: 2,
                                 child: Text(
                                   AppFormatters.currency(
-                                      item.purchase.totalAmount),
+                                    item.purchase.totalAmount,
+                                  ),
                                   style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               Expanded(
                                 flex: 2,
                                 child: Align(
                                   alignment: Alignment.centerLeft,
-                                  child: item.purchase.status ==
+                                  child:
+                                      item.purchase.status ==
                                           PurchaseStatus.received
                                       ? StatusBadge.success(
-                                          item.purchase.status.label)
+                                          loc.t(
+                                            item
+                                                .purchase
+                                                .status
+                                                .localizationKey,
+                                          ),
+                                        )
                                       : item.purchase.status ==
-                                              PurchaseStatus.partiallyReceived
-                                          ? StatusBadge.warning(
-                                              item.purchase.status.label)
-                                          : StatusBadge.info(
-                                              item.purchase.status.label),
+                                            PurchaseStatus.partiallyReceived
+                                      ? StatusBadge.warning(
+                                          loc.t(
+                                            item
+                                                .purchase
+                                                .status
+                                                .localizationKey,
+                                          ),
+                                        )
+                                      : StatusBadge.info(
+                                          loc.t(
+                                            item
+                                                .purchase
+                                                .status
+                                                .localizationKey,
+                                          ),
+                                        ),
                                 ),
                               ),
                               Expanded(
@@ -585,15 +693,16 @@ class PurchasesPage extends ConsumerWidget {
                                 child: canReceive
                                     ? OutlinedButton.icon(
                                         icon: const Icon(
-                                            Icons.inventory_outlined,
-                                            size: 16),
+                                          Icons.inventory_outlined,
+                                          size: 16,
+                                        ),
                                         label: const Text('Terima Barang'),
                                         onPressed: () =>
                                             _showReceiveGoodsDialog(
-                                          context,
-                                          ref,
-                                          item,
-                                        ),
+                                              context,
+                                              ref,
+                                              item,
+                                            ),
                                       )
                                     : const Text('-'),
                               ),

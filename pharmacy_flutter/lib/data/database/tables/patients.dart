@@ -9,13 +9,13 @@ class Patients extends Table {
   TextColumn get patientNumber => text()();
   TextColumn get firstName => text()();
   TextColumn get lastName => text().nullable()();
-  DateTimeColumn get dateOfBirth => dateTime().nullable()();
+  IntColumn get dateOfBirth => integer().nullable()();
   TextColumn get sex => text().nullable()();
   TextColumn get phone => text().nullable()();
   TextColumn get address => text().nullable()();
   TextColumn get notes => text().nullable()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -6,10 +6,7 @@ class MedicineWithCategory {
   final Medicine medicine;
   final Category? category;
 
-  const MedicineWithCategory({
-    required this.medicine,
-    this.category,
-  });
+  const MedicineWithCategory({required this.medicine, this.category});
 }
 
 abstract class IMedicineDao {
@@ -50,8 +47,7 @@ class MedicineDao implements IMedicineDao {
         _db.categories,
         _db.categories.id.equalsExp(_db.medicines.categoryId),
       ),
-    ])
-      ..where(_db.medicines.pharmacyId.equals(pharmacyId));
+    ])..where(_db.medicines.pharmacyId.equals(pharmacyId));
 
     if (activeOnly) {
       query.where(_db.medicines.isActive.equals(true));
@@ -127,10 +123,12 @@ class MedicineDao implements IMedicineDao {
   @override
   Future<Medicine?> getByBarcode(String pharmacyId, String barcode) async {
     final query = _db.select(_db.medicines)
-      ..where((tbl) =>
-          tbl.pharmacyId.equals(pharmacyId) &
-          tbl.barcode.equals(barcode) &
-          tbl.isActive.equals(true));
+      ..where(
+        (tbl) =>
+            tbl.pharmacyId.equals(pharmacyId) &
+            tbl.barcode.equals(barcode) &
+            tbl.isActive.equals(true),
+      );
     return query.getSingleOrNull();
   }
 
@@ -146,9 +144,9 @@ class MedicineDao implements IMedicineDao {
 
   @override
   Future<bool> toggleActive(String id, bool isActive) async {
-    final count = await (_db.update(_db.medicines)
-          ..where((tbl) => tbl.id.equals(id)))
-        .write(MedicinesCompanion(isActive: Value(isActive)));
+    final count =
+        await (_db.update(_db.medicines)..where((tbl) => tbl.id.equals(id)))
+            .write(MedicinesCompanion(isActive: Value(isActive)));
     return count > 0;
   }
 
@@ -160,8 +158,7 @@ class MedicineDao implements IMedicineDao {
   }
 
   @override
-  Future<MedicinePackage> insertPackage(
-      MedicinePackagesCompanion entry) async {
+  Future<MedicinePackage> insertPackage(MedicinePackagesCompanion entry) async {
     return _db.into(_db.medicinePackages).insertReturning(entry);
   }
 }

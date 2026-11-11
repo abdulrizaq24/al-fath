@@ -7,10 +7,7 @@ class PurchaseItemWithMedicine {
   final PurchaseItem item;
   final Medicine medicine;
 
-  const PurchaseItemWithMedicine({
-    required this.item,
-    required this.medicine,
-  });
+  const PurchaseItemWithMedicine({required this.item, required this.medicine});
 }
 
 class PurchaseWithDetails {
@@ -43,7 +40,8 @@ abstract class IPurchaseDao {
   Future<PurchaseReceipt> insertReceipt(PurchaseReceiptsCompanion entry);
   Future<void> insertReceiptItems(List<PurchaseReceiptItemsCompanion> items);
   Future<List<PurchaseReceiptItem>> getReceiptItemsForPurchase(
-      String purchaseId);
+    String purchaseId,
+  );
 }
 
 class PurchaseDao implements IPurchaseDao {
@@ -100,18 +98,18 @@ class PurchaseDao implements IPurchaseDao {
 
   @override
   Future<PurchaseWithDetails?> getById(String id) async {
-    final purchase = await (_db.select(_db.purchases)
-          ..where((tbl) => tbl.id.equals(id)))
-        .getSingleOrNull();
+    final purchase = await (_db.select(
+      _db.purchases,
+    )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
     if (purchase == null) return null;
 
-    final supplier = await (_db.select(_db.suppliers)
-          ..where((tbl) => tbl.id.equals(purchase.supplierId)))
-        .getSingle();
+    final supplier = await (_db.select(
+      _db.suppliers,
+    )..where((tbl) => tbl.id.equals(purchase.supplierId))).getSingle();
 
-    final user = await (_db.select(_db.users)
-          ..where((tbl) => tbl.id.equals(purchase.createdById)))
-        .getSingle();
+    final user = await (_db.select(
+      _db.users,
+    )..where((tbl) => tbl.id.equals(purchase.createdById))).getSingle();
 
     final itemsQuery = _db.select(_db.purchaseItems).join([
       innerJoin(
@@ -150,26 +148,27 @@ class PurchaseDao implements IPurchaseDao {
 
   @override
   Future<bool> updateStatus(String id, PurchaseStatus status) async {
-    final count = await (_db.update(_db.purchases)
-          ..where((tbl) => tbl.id.equals(id)))
-        .write(
-      PurchasesCompanion(
-        status: Value(status),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final count =
+        await (_db.update(
+          _db.purchases,
+        )..where((tbl) => tbl.id.equals(id))).write(
+          PurchasesCompanion(
+            status: Value(status),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
     return count > 0;
   }
 
   @override
-  Future<PurchaseReceipt> insertReceipt(
-      PurchaseReceiptsCompanion entry) async {
+  Future<PurchaseReceipt> insertReceipt(PurchaseReceiptsCompanion entry) async {
     return _db.into(_db.purchaseReceipts).insertReturning(entry);
   }
 
   @override
   Future<void> insertReceiptItems(
-      List<PurchaseReceiptItemsCompanion> items) async {
+    List<PurchaseReceiptItemsCompanion> items,
+  ) async {
     await _db.batch((b) {
       b.insertAll(_db.purchaseReceiptItems, items);
     });
@@ -177,7 +176,8 @@ class PurchaseDao implements IPurchaseDao {
 
   @override
   Future<List<PurchaseReceiptItem>> getReceiptItemsForPurchase(
-      String purchaseId) async {
+    String purchaseId,
+  ) async {
     final query = _db.select(_db.purchaseReceiptItems).join([
       innerJoin(
         _db.purchaseReceipts,

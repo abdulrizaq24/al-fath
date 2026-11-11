@@ -8,8 +8,8 @@ class SaleItemBatches extends Table {
   TextColumn get id => text()();
   TextColumn get saleItemId => text().references(SaleItems, #id)();
   TextColumn get batchId => text().references(Batches, #id)();
-  RealColumn get quantity => real()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get quantity => integer()();
+  IntColumn get createdAt => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

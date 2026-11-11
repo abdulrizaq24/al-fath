@@ -10,7 +10,10 @@ import '../data/daos/report_dao.dart';
 import '../data/daos/sale_dao.dart';
 
 abstract class IExportService {
-  Future<Uint8List> generateReceiptPdf(SaleWithDetails sale, String pharmacyName);
+  Future<Uint8List> generateReceiptPdf(
+    SaleWithDetails sale,
+    String pharmacyName,
+  );
   Future<List<int>> generateSalesReportExcel({
     required SalesFinancialSummary summary,
     required List<TopSellingMedicine> topSelling,
@@ -174,33 +177,33 @@ class ExportService implements IExportService {
     required List<SaleWithDetails> sales,
   }) async {
     final excel = Excel.createExcel();
-    final Sheet sheet = excel['Ringkasan Penjualan'];
+    final Sheet sheet = excel['Sales Summary'];
 
-    sheet.appendRow([TextCellValue('LAPORAN RINGKASAN PENJUALAN APOTEK')]);
+    sheet.appendRow([TextCellValue('PHARMACY SALES SUMMARY REPORT')]);
     sheet.appendRow([TextCellValue('')]);
-    sheet.appendRow([TextCellValue('Metrik'), TextCellValue('Nilai')]);
+    sheet.appendRow([TextCellValue('Metric'), TextCellValue('Value')]);
     sheet.appendRow([
-      TextCellValue('Total Transaksi'),
+      TextCellValue('Total Transactions'),
       IntCellValue(summary.totalTransactions),
     ]);
     sheet.appendRow([
-      TextCellValue('Penjualan Kotor (Gross)'),
+      TextCellValue('Gross Sales'),
       DoubleCellValue(summary.grossSales),
     ]);
     sheet.appendRow([
-      TextCellValue('Total Diskon'),
+      TextCellValue('Total Discount'),
       DoubleCellValue(summary.totalDiscount),
     ]);
     sheet.appendRow([
-      TextCellValue('Penjualan Bersih (Net)'),
+      TextCellValue('Net Sales'),
       DoubleCellValue(summary.netSales),
     ]);
     sheet.appendRow([
-      TextCellValue('COGS (Harga Pokok)'),
+      TextCellValue('COGS (Cost of Goods)'),
       DoubleCellValue(summary.totalCogs),
     ]);
     sheet.appendRow([
-      TextCellValue('Laba Kotor (Gross Profit)'),
+      TextCellValue('Gross Profit'),
       DoubleCellValue(summary.grossProfit),
     ]);
     sheet.appendRow([
@@ -209,11 +212,11 @@ class ExportService implements IExportService {
     ]);
 
     sheet.appendRow([TextCellValue('')]);
-    sheet.appendRow([TextCellValue('OBAT TERLARIS (TOP SELLING)')]);
+    sheet.appendRow([TextCellValue('TOP SELLING MEDICINES')]);
     sheet.appendRow([
-      TextCellValue('Nama Obat'),
-      TextCellValue('Jumlah Terjual'),
-      TextCellValue('Total Omzet'),
+      TextCellValue('Medicine Name'),
+      TextCellValue('Units Sold'),
+      TextCellValue('Total Revenue'),
     ]);
     for (final item in topSelling) {
       sheet.appendRow([

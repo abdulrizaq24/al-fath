@@ -6,10 +6,7 @@ class LowStockMedicine {
   final Medicine medicine;
   final double currentStock;
 
-  const LowStockMedicine({
-    required this.medicine,
-    required this.currentStock,
-  });
+  const LowStockMedicine({required this.medicine, required this.currentStock});
 }
 
 class InventoryTransactionWithDetails {
@@ -28,7 +25,8 @@ class InventoryTransactionWithDetails {
 
 abstract class IInventoryDao {
   Future<InventoryTransaction> recordTransaction(
-      InventoryTransactionsCompanion entry);
+    InventoryTransactionsCompanion entry,
+  );
   Future<List<InventoryTransactionWithDetails>> getTransactions(
     String pharmacyId, {
     String? medicineId,
@@ -44,7 +42,8 @@ class InventoryDao implements IInventoryDao {
 
   @override
   Future<InventoryTransaction> recordTransaction(
-      InventoryTransactionsCompanion entry) async {
+    InventoryTransactionsCompanion entry,
+  ) async {
     return _db.into(_db.inventoryTransactions).insertReturning(entry);
   }
 
@@ -67,8 +66,7 @@ class InventoryDao implements IInventoryDao {
         _db.users,
         _db.users.id.equalsExp(_db.inventoryTransactions.createdById),
       ),
-    ])
-      ..where(_db.inventoryTransactions.pharmacyId.equals(pharmacyId));
+    ])..where(_db.inventoryTransactions.pharmacyId.equals(pharmacyId));
 
     if (medicineId != null && medicineId.isNotEmpty) {
       query.where(_db.inventoryTransactions.medicineId.equals(medicineId));
@@ -90,21 +88,24 @@ class InventoryDao implements IInventoryDao {
   }
 
   @override
-  Future<List<LowStockMedicine>> getLowStockMedicines(
-      String pharmacyId) async {
-    final medicines = await (_db.select(_db.medicines)
-          ..where((tbl) =>
-              tbl.pharmacyId.equals(pharmacyId) & tbl.isActive.equals(true)))
-        .get();
+  Future<List<LowStockMedicine>> getLowStockMedicines(String pharmacyId) async {
+    final medicines =
+        await (_db.select(_db.medicines)..where(
+              (tbl) =>
+                  tbl.pharmacyId.equals(pharmacyId) & tbl.isActive.equals(true),
+            ))
+            .get();
 
     final result = <LowStockMedicine>[];
     for (final med in medicines) {
-      final batches = await (_db.select(_db.batches)
-            ..where((tbl) =>
-                tbl.pharmacyId.equals(pharmacyId) &
-                tbl.medicineId.equals(med.id) &
-                tbl.currentQuantity.isBiggerThanValue(0)))
-          .get();
+      final batches =
+          await (_db.select(_db.batches)..where(
+                (tbl) =>
+                    tbl.pharmacyId.equals(pharmacyId) &
+                    tbl.medicineId.equals(med.id) &
+                    tbl.currentQuantity.isBiggerThanValue(0),
+              ))
+              .get();
 
       final totalStock = batches.fold<double>(
         0.0,

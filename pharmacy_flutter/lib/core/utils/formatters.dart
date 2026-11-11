@@ -4,8 +4,8 @@ class AppFormatters {
   AppFormatters._();
 
   static final NumberFormat _currencyFormat = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
+    locale: 'en_US',
+    symbol: 'SDG ',
     decimalDigits: 0,
   );
 

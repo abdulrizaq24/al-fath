@@ -31,10 +31,7 @@ class CategoryDao implements ICategoryDao {
   }
 
   @override
-  Stream<List<Category>> watchAll(
-    String pharmacyId, {
-    bool activeOnly = true,
-  }) {
+  Stream<List<Category>> watchAll(String pharmacyId, {bool activeOnly = true}) {
     final query = _db.select(_db.categories)
       ..where((tbl) => tbl.pharmacyId.equals(pharmacyId));
     if (activeOnly) {
@@ -62,9 +59,9 @@ class CategoryDao implements ICategoryDao {
 
   @override
   Future<bool> toggleActive(String id, bool isActive) async {
-    final count = await (_db.update(_db.categories)
-          ..where((tbl) => tbl.id.equals(id)))
-        .write(CategoriesCompanion(isActive: Value(isActive)));
+    final count =
+        await (_db.update(_db.categories)..where((tbl) => tbl.id.equals(id)))
+            .write(CategoriesCompanion(isActive: Value(isActive)));
     return count > 0;
   }
 }

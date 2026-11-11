@@ -20,11 +20,11 @@ enum ControlledStatus {
   String get label {
     switch (this) {
       case ControlledStatus.otc:
-        return 'OTC (Bebas)';
+        return 'OTC';
       case ControlledStatus.prescription:
-        return 'Resep Dokter';
+        return 'Prescription';
       case ControlledStatus.controlled:
-        return 'Narkotika / Psikotropika';
+        return 'Controlled Substance';
     }
   }
 }
@@ -41,13 +41,13 @@ enum PurchaseStatus {
       case PurchaseStatus.draft:
         return 'Draft';
       case PurchaseStatus.ordered:
-        return 'Dipesan';
+        return 'Ordered';
       case PurchaseStatus.partiallyReceived:
-        return 'Diterima Sebagian';
+        return 'Partially Received';
       case PurchaseStatus.received:
-        return 'Selesai Diterima';
+        return 'Received';
       case PurchaseStatus.cancelled:
-        return 'Dibatalkan';
+        return 'Cancelled';
     }
   }
 }
@@ -61,13 +61,13 @@ enum PrescriptionStatus {
   String get label {
     switch (this) {
       case PrescriptionStatus.pending:
-        return 'Menunggu';
+        return 'Pending';
       case PrescriptionStatus.partiallyDispensed:
-        return 'Dilayani Sebagian';
+        return 'Partially Dispensed';
       case PrescriptionStatus.dispensed:
-        return 'Selesai';
+        return 'Dispensed';
       case PrescriptionStatus.cancelled:
-        return 'Dibatalkan';
+        return 'Cancelled';
     }
   }
 }
@@ -81,13 +81,13 @@ enum SaleStatus {
   String get label {
     switch (this) {
       case SaleStatus.completed:
-        return 'Selesai';
+        return 'Completed';
       case SaleStatus.voided:
-        return 'Dibatalkan (Void)';
+        return 'Voided';
       case SaleStatus.refunded:
-        return 'Dikembalikan (Refund)';
+        return 'Refunded';
       case SaleStatus.partiallyRefunded:
-        return 'Refund Sebagian';
+        return 'Partially Refunded';
     }
   }
 }
@@ -102,17 +102,27 @@ enum PaymentMethod {
   String get label {
     switch (this) {
       case PaymentMethod.cash:
-        return 'Tunai';
+        return 'Cash';
       case PaymentMethod.card:
-        return 'Kartu Debit/Kredit';
+        return 'Debit/Credit Card';
       case PaymentMethod.bankTransfer:
-        return 'Transfer Bank';
+        return 'Bank Transfer';
       case PaymentMethod.mobilePayment:
-        return 'QRIS / E-Wallet';
+        return 'Mobile / E-Wallet';
       case PaymentMethod.other:
-        return 'Lainnya';
+        return 'Other';
     }
   }
+}
+
+extension PaymentMethodLocalization on PaymentMethod {
+  String get localizationKey => switch (this) {
+    PaymentMethod.cash => 'cash',
+    PaymentMethod.card => 'card',
+    PaymentMethod.bankTransfer => 'bankTransfer',
+    PaymentMethod.mobilePayment => 'mobilePayment',
+    PaymentMethod.other => 'other',
+  };
 }
 
 enum PaymentStatus {
@@ -126,11 +136,11 @@ enum PaymentStatus {
       case PaymentStatus.pending:
         return 'Pending';
       case PaymentStatus.completed:
-        return 'Lunas';
+        return 'Paid';
       case PaymentStatus.failed:
-        return 'Gagal';
+        return 'Failed';
       case PaymentStatus.refunded:
-        return 'Dikembalikan';
+        return 'Refunded';
     }
   }
 }
@@ -147,21 +157,53 @@ enum InventoryTransactionType {
   String get label {
     switch (this) {
       case InventoryTransactionType.purchase:
-        return 'Pembelian';
+        return 'Purchase';
       case InventoryTransactionType.sale:
-        return 'Penjualan';
+        return 'Sale';
       case InventoryTransactionType.customerReturn:
-        return 'Retur Pelanggan';
+        return 'Customer Return';
       case InventoryTransactionType.supplierReturn:
-        return 'Retur Supplier';
+        return 'Supplier Return';
       case InventoryTransactionType.damage:
-        return 'Kerusakan';
+        return 'Damage';
       case InventoryTransactionType.expiry:
-        return 'Kadaluarsa';
+        return 'Expired';
       case InventoryTransactionType.adjustment:
-        return 'Penyesuaian (Opname)';
+        return 'Stock Adjustment';
     }
   }
+}
+
+extension ControlledStatusLocalization on ControlledStatus {
+  String get localizationKey => switch (this) {
+    ControlledStatus.otc => 'otc',
+    ControlledStatus.prescription => 'prescriptionRequired',
+    ControlledStatus.controlled => 'controlled',
+  };
+}
+
+extension PurchaseStatusLocalization on PurchaseStatus {
+  String get localizationKey =>
+      'purchaseStatus${name[0].toUpperCase()}${name.substring(1)}';
+}
+
+extension PrescriptionStatusLocalization on PrescriptionStatus {
+  String get localizationKey =>
+      'prescriptionStatus${name[0].toUpperCase()}${name.substring(1)}';
+}
+
+extension SaleStatusLocalization on SaleStatus {
+  String get localizationKey => switch (this) {
+    SaleStatus.completed => 'completed',
+    SaleStatus.voided => 'voided',
+    SaleStatus.refunded => 'refunded',
+    SaleStatus.partiallyRefunded => 'partiallyRefunded',
+  };
+}
+
+extension InventoryTransactionLocalization on InventoryTransactionType {
+  String get localizationKey =>
+      'inventory${name[0].toUpperCase()}${name.substring(1)}';
 }
 
 enum ReferenceType {
@@ -175,17 +217,17 @@ enum ReferenceType {
   String get label {
     switch (this) {
       case ReferenceType.purchaseReceipt:
-        return 'Penerimaan Pembelian';
+        return 'Purchase Receipt';
       case ReferenceType.sale:
-        return 'Penjualan Kasir';
+        return 'POS Sale';
       case ReferenceType.customerReturn:
-        return 'Retur Pelanggan';
+        return 'Customer Return';
       case ReferenceType.supplierReturn:
-        return 'Retur Supplier';
+        return 'Supplier Return';
       case ReferenceType.adjustment:
-        return 'Penyesuaian Stok';
+        return 'Stock Adjustment';
       case ReferenceType.other:
-        return 'Lainnya';
+        return 'Other';
     }
   }
 }

@@ -1,4 +1,4 @@
-# Pharma One — Design System
+opencode# Pharma One — Design System
 
 > **Source:** Visual analysis of the user-provided Pharma One dashboard composition (1920 × 960 px).
 > **Scope:** Screenshot-derived UI design specification for implementation by AI coding agents.

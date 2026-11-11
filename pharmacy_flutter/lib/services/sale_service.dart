@@ -80,7 +80,7 @@ class SaleService implements ISaleService {
     double taxRate = 0.0,
   }) async {
     if (items.isEmpty) {
-      throw const ValidationException('Keranjang penjualan tidak boleh kosong.');
+      throw const ValidationException('The sales cart cannot be empty.');
     }
 
     double subtotal = 0.0;
@@ -88,7 +88,7 @@ class SaleService implements ISaleService {
     for (final item in items) {
       if (item.quantity <= 0) {
         throw ValidationException(
-          'Kuantitas ${item.medicineName} harus lebih dari 0.',
+          'Quantity ${item.medicineName} must be greater than 0.',
         );
       }
       subtotal += item.quantity * item.unitPrice;
@@ -99,9 +99,7 @@ class SaleService implements ISaleService {
     final grandTotal = (subtotal - totalDiscount) + totalTax;
 
     if (payment.amount < grandTotal) {
-      throw ValidationException(
-        'Nominal pembayaran kurang dari total tagihan.',
-      );
+      throw ValidationException('Paid amount is less than the total bill.');
     }
 
     final invoiceNumber = _generateInvoiceNumber();
@@ -124,8 +122,8 @@ class SaleService implements ISaleService {
 
         if (totalAvailable < item.quantity) {
           throw InsufficientStockException(
-            'Stok tidak cukup untuk "${item.medicineName}". '
-            'Tersedia: $totalAvailable, diminta: ${item.quantity}',
+            'Insufficient stock for "${item.medicineName}". '
+            'Available: $totalAvailable, requested: ${item.quantity}',
           );
         }
 
@@ -140,10 +138,9 @@ class SaleService implements ISaleService {
               ? remainingToAllocate
               : batch.currentQuantity;
 
-          allocations.add(_AllocatedBatch(
-            batch: batch,
-            quantity: qtyFromThisBatch,
-          ));
+          allocations.add(
+            _AllocatedBatch(batch: batch, quantity: qtyFromThisBatch),
+          );
 
           remainingToAllocate -= qtyFromThisBatch;
         }
@@ -189,7 +186,9 @@ class SaleService implements ISaleService {
         final allocations = preparedItemBatches[item.medicineId]!;
         for (final alloc in allocations) {
           // Record sale_item_batches
-          await _db.into(_db.saleItemBatches).insert(
+          await _db
+              .into(_db.saleItemBatches)
+              .insert(
                 SaleItemBatchesCompanion(
                   id: Value(UuidGenerator.v4()),
                   saleItemId: Value(saleItemId),
@@ -246,8 +245,5 @@ class _AllocatedBatch {
   final Batche batch;
   final double quantity;
 
-  const _AllocatedBatch({
-    required this.batch,
-    required this.quantity,
-  });
+  const _AllocatedBatch({required this.batch, required this.quantity});
 }
